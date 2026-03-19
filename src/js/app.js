@@ -43,6 +43,7 @@ export async function initApp() {
 }
 
 // Update welcome message with user's first name
+// Update welcome message with user's first name
 async function updateWelcomeMessage() {
   if (!currentUser) return;
   
@@ -57,22 +58,21 @@ async function updateWelcomeMessage() {
       // Get first name from full name
       const firstName = profile.full_name.split(' ')[0];
       
-      // Update the welcome message - be more specific with selector
-      const welcomeHeader = document.querySelector('#dashboard-page header h1');
-      if (welcomeHeader) {
-        welcomeHeader.innerHTML = `Welcome back, <span class="gradient-text">${firstName}</span>! 👋`;
-        console.log('Welcome message updated to:', firstName);
+      // Update just the span with the name
+      const nameSpan = document.getElementById('user-first-name');
+      if (nameSpan) {
+        nameSpan.textContent = firstName;
+        console.log('Name updated to:', firstName);
       } else {
-        console.log('Welcome header element not found');
+        console.log('Name span not found');
       }
     } else {
-      console.log('No profile or full_name found');
+      console.log('No profile found for user');
     }
   } catch (error) {
-    console.error('Error fetching user profile:', error);
+    console.error('Error:', error);
   }
 }
-
 // Load applications from Supabase
 async function loadApplications() {
   const { data, error } = await getAllApplications();

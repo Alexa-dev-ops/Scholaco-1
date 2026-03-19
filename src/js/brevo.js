@@ -1,7 +1,3 @@
-/**
- * Brevo Email Service
- * Sends email notifications using Brevo API
- */
 
 const BREVO_API_KEY = import.meta.env.VITE_BREVO_API_KEY || '';
 const BREVO_SENDER_EMAIL = import.meta.env.VITE_BREVO_SENDER_EMAIL || '';
