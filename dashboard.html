@@ -45,12 +45,12 @@
 <body class="h-full font-body bg-white text-gray-800 overflow-auto">
 
   <div id="dashboard-page">
-    <div class="min-h-screen bg-gray-50 flex">
-      <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <div class="min-h-screen bg-gray-50 flex overflow-hidden">
 
-      <!-- Sidebar -->
+      <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+
       <aside id="app-sidebar"
-        class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed md:relative h-full z-40 md:z-0">
+        class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50 shadow-2xl md:shadow-none h-full">
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -59,17 +59,17 @@
               </div>
               <div class="flex flex-col"></div>
             </div>
-            <button class="md:hidden p-2 hover:bg-gray-100 rounded-lg" onclick="window.toggleSidebar()">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button id="close-sidebar-btn" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           <button
-            class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700"
+            class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="overview">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -78,7 +78,8 @@
             <span class="font-medium">Dashboard</span>
           </button>
 
-          <button class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700"
+          <button
+            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="applications">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -87,7 +88,8 @@
             <span class="font-medium">Applications</span>
           </button>
 
-          <button class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700"
+          <button
+            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="calendar">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -96,7 +98,8 @@
             <span class="font-medium">Calendar</span>
           </button>
 
-          <button class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700"
+          <button
+            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="email">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -105,7 +108,8 @@
             <span class="font-medium">Email Integration</span>
           </button>
 
-          <button class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700"
+          <button
+            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="reminders">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -115,10 +119,9 @@
           </button>
         </nav>
 
-        <!-- FIX: proper <button> with no stray </a> -->
-        <div class="p-4 border-t border-gray-100">
+        <div class="p-4 border-t border-gray-100 bg-white">
           <button onclick="window.handleSignOut()"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-gray-50 transition-colors">
+            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -128,27 +131,38 @@
         </div>
       </aside>
 
-      <!-- Main content -->
-      <main class="dashboard-wrapper flex-1 p-4 sm:p-8 w-full overflow-auto">
+      <main class="dashboard-wrapper flex-1 p-4 sm:p-8 w-full h-screen overflow-y-auto">
 
-        <!-- Header -->
+        <div
+          class="md:hidden flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
+          <div class="flex items-center gap-2">
+            <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-8 w-auto">
+          </div>
+          <button id="mobile-menu-btn"
+            class="text-gray-600 hover:text-maroon-800 bg-gray-50 rounded-lg p-2 focus:outline-none transition-colors">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-8">
-          <div class="flex-1">
-            <!-- FIX: id="user-first-name" on the span, fallback text "there" -->
+          <div class="flex-1 w-full">
             <header id="welcome-header" class="mb-2">
-              <div class="welcome-content relative">
+              <div
+                class="welcome-content relative bg-white md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none shadow-sm md:shadow-none border md:border-none border-gray-100">
                 <h1 class="font-display text-2xl sm:text-3xl font-bold text-gray-800">
                   Welcome back, <span id="user-first-name" class="gradient-text"></span>! 👋
                 </h1>
                 <p class="text-gray-500 mt-1 text-sm sm:text-base">Here's what's happening with your scholarships today.
                 </p>
                 <button id="welcome-dismiss" aria-label="Dismiss welcome"
-                  class="absolute top-0 right-0 p-2 rounded-full hover:bg-gray-100 text-gray-500">✕</button>
+                  class="absolute top-2 md:top-0 right-2 md:right-0 p-2 rounded-full hover:bg-gray-100 text-gray-400">✕</button>
               </div>
             </header>
           </div>
           <button id="add-application-button"
-            class="btn-primary px-4 sm:px-6 py-3 rounded-xl text-white font-semibold flex items-center gap-2 w-full sm:w-auto justify-center flex-shrink-0">
+            class="btn-primary px-4 sm:px-6 py-3 rounded-xl text-white font-semibold flex items-center gap-2 w-full sm:w-auto justify-center flex-shrink-0 shadow-lg shadow-maroon-500/30">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -156,8 +170,7 @@
           </button>
         </div>
 
-        <!-- Dashboard Overview -->
-        <div id="dashboard-overview" class="dashboard-view block">
+        <div id="dashboard-overview" class="dashboard-view block animate-fade-in-up">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
 
             <div class="glass-card rounded-2xl p-6 card-hover">
@@ -235,8 +248,7 @@
           </div>
         </div>
 
-        <!-- Applications View -->
-        <div id="dashboard-applications" class="dashboard-view hidden">
+        <div id="dashboard-applications" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-6">
               <h2 class="font-display text-xl font-bold">All Applications</h2>
@@ -252,8 +264,7 @@
           </div>
         </div>
 
-        <!-- Calendar View -->
-        <div id="dashboard-calendar" class="dashboard-view hidden">
+        <div id="dashboard-calendar" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <h2 class="font-display text-xl font-bold mb-6">Upcoming Deadlines</h2>
             <div id="calendar-deadlines" class="space-y-4">
@@ -269,13 +280,12 @@
           </div>
         </div>
 
-        <!-- Email Integration View -->
-        <div id="dashboard-email" class="dashboard-view hidden">
+        <div id="dashboard-email" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <h2 class="font-display text-xl font-bold mb-6">Email Integration</h2>
             <p class="text-gray-600 mb-8">Connect your email to automatically track scholarship responses and updates.
             </p>
-            <div class="grid md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
               <div
                 class="border-2 border-dashed border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-maroon-300 transition-colors cursor-pointer group">
@@ -295,7 +305,7 @@
                 <h3 class="font-semibold text-lg mb-2">Connect Gmail</h3>
                 <p class="text-gray-500 text-sm">Automatically scan for scholarship emails</p>
                 <button onclick="window.connectGmail()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors">Connect</button>
+                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
               </div>
 
               <div
@@ -310,7 +320,7 @@
                 <h3 class="font-semibold text-lg mb-2">Connect Outlook</h3>
                 <p class="text-gray-500 text-sm">Sync your Microsoft email account</p>
                 <button onclick="window.connectOutlook()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors">Connect</button>
+                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
               </div>
 
               <div
@@ -325,7 +335,7 @@
                 <h3 class="font-semibold text-lg mb-2">Connect Yahoo Mail</h3>
                 <p class="text-gray-500 text-sm">Link your Yahoo email account</p>
                 <button onclick="window.connectYahoo()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors">Connect</button>
+                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
               </div>
 
               <div
@@ -340,15 +350,14 @@
                 <h3 class="font-semibold text-lg mb-2">Other Email</h3>
                 <p class="text-gray-500 text-sm">Connect via IMAP/SMTP</p>
                 <button onclick="window.configureOtherEmail()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors">Configure</button>
+                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Configure</button>
               </div>
 
             </div>
           </div>
         </div>
 
-        <!-- Reminders View -->
-        <div id="dashboard-reminders" class="dashboard-view hidden">
+        <div id="dashboard-reminders" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <h2 class="font-display text-xl font-bold mb-6">Reminders</h2>
             <div id="reminders-list" class="space-y-4">
@@ -368,9 +377,8 @@
     </div>
   </div>
 
-  <!-- Add Application Modal -->
   <div id="modal-add-application" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
       <div
         class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
@@ -396,7 +404,7 @@
               class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
               placeholder="e.g., Bill &amp; Melinda Gates Foundation">
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
               <input type="text" id="app-amount"
@@ -431,18 +439,18 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <button type="button" data-modal-close="add-application"
-              class="flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+              class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
             <button type="submit" id="add-app-btn"
-              class="flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Add Application</button>
+              class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Add
+              Application</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Edit Application Modal -->
   <div id="modal-edit-application" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
       <div
         class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
@@ -468,7 +476,7 @@
             <input type="text" id="edit-app-org"
               class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="edit-app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
               <input type="text" id="edit-app-amount"
@@ -501,17 +509,48 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <button type="button" data-modal-close="edit-application"
-              class="flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+              class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
             <button type="submit" id="edit-app-btn"
-              class="flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Save Changes</button>
+              class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Save Changes</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Toast Container -->
-  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+  <div id="toast-container" class="fixed top-4 right-4 sm:bottom-6 sm:right-6 sm:top-auto z-50 flex flex-col gap-2">
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+      const sidebar = document.getElementById('app-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      const sidebarLinks = document.querySelectorAll('.sidebar-item');
+
+      function openSidebar() {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+
+      if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+      if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+      if (overlay) overlay.addEventListener('click', closeSidebar);
+
+      // Auto-close sidebar on mobile when a link is clicked
+      sidebarLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth < 768) closeSidebar();
+        });
+      });
+    });
+  </script>
 
   <script type="module" src="/src/js/app.js"></script>
 
