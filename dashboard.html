@@ -57,7 +57,6 @@
               <div class="flex items-baseline gap-0">
                 <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto">
               </div>
-              <div class="flex flex-col"></div>
             </div>
             <button id="close-sidebar-btn" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,32 +521,37 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-      const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-      const sidebar = document.getElementById('app-sidebar');
-      const overlay = document.getElementById('sidebar-overlay');
-      const sidebarLinks = document.querySelectorAll('.sidebar-item');
+    // This executes immediately upon the script block being parsed by the browser
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
+    const sidebar = document.getElementById('app-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    const sidebarLinks = document.querySelectorAll('.sidebar-item');
 
-      function openSidebar() {
+    function openSidebar() {
+      if (sidebar && overlay) {
         sidebar.classList.remove('-translate-x-full');
         overlay.classList.remove('hidden');
       }
+    }
 
-      function closeSidebar() {
+    function closeSidebar() {
+      if (sidebar && overlay) {
         sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
       }
+    }
 
-      if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
-      if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-      if (overlay) overlay.addEventListener('click', closeSidebar);
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+    if (overlay) overlay.addEventListener('click', closeSidebar);
 
-      // Auto-close sidebar on mobile when a link is clicked
-      sidebarLinks.forEach(link => {
-        link.addEventListener('click', () => {
-          if (window.innerWidth < 768) closeSidebar();
-        });
+    // Auto-close sidebar on mobile when a link is clicked
+    sidebarLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (window.innerWidth < 768) {
+          closeSidebar();
+        }
       });
     });
   </script>
