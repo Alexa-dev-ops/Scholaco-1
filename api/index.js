@@ -8,6 +8,10 @@ import { startScheduler } from './scheduler.js';
 dotenv.config();
 
 const app = express();
+// Health check route for UptimeRobot
+app.get('/ping', (req, res) => {
+  res.status(200).send('pong');
+});
 const PORT = process.env.PORT || 8000;
 
 // --- Middleware ---
