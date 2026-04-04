@@ -9,11 +9,13 @@ const GMAIL_PASS = process.env.GMAIL_APP_PASSWORD;
 
 // --- NODEMAILER SETUP (ACTIVE FOR BETA) ---
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
-    user: GMAIL_USER,
-    pass: GMAIL_PASS,
-  },
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
 });
 
 // Base send function — everything goes through here
