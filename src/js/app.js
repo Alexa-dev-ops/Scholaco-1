@@ -1,9 +1,8 @@
 /**
  * Scholaco Main App Logic
- * Refactored from inline script
  */
 
-import { supabase, getCurrentUser, signIn, signUp, signOut, isSupabaseConfigured } from './supabase.js';
+import { supabase, getCurrentUser, signIn, signUp, signOutUser, isSupabaseConfigured } from './supabase.js';
 import { getAllApplications, createApplication, updateApplication, deleteApplication, getStats } from './applications.js';
 import { sendWelcomeEmail, sendDeadlineReminder, sendApplicationSubmitted } from './brevo.js';
 
@@ -12,7 +11,7 @@ let applications = [];
 let currentEditApp = null;
 let sidebarOpen = false;
 let currentUser = null;
-let welcomeTimer = null;
+let welcomeDismissed = false; // dismissed on first interaction, not on a timer
 const WELCOME_TRIGGER_KEY = 'scholaco_welcome_trigger';
 const WELCOME_SEEN_KEY = 'scholaco_welcome_seen';
 
@@ -23,75 +22,79 @@ export async function initApp() {
     return;
   }
 
-  // Check if user is logged in
   currentUser = await getCurrentUser();
-  
+
   if (currentUser) {
-    // Update welcome message with user's first name
     await updateWelcomeMessage();
-    
-    if (window.location.hash === '#dashboard') {
-      showPage('dashboard-page');
-      await loadApplications();
-    }
+    await loadApplications();
   }
-  
-  // Listen for auth changes
+
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
       currentUser = session.user;
       await updateWelcomeMessage();
-      showPage('dashboard-page');
-      loadApplications();
+      await loadApplications();
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       clearWelcomeState();
-      showPage('landing-page');
+      window.location.href = 'index.html';
     }
   });
 }
 
-// Update welcome message with user's first name
-// Update welcome message with user's first name
+// Read full_name from auth metadata instantly — no waiting on DB query
 async function updateWelcomeMessage() {
-  if (!currentUser || !supabase) return;
-  
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', currentUser.id)
-      .single();
-    
-    if (profile && profile.full_name) {
-      // Get first name from full name
-      const firstName = profile.full_name.split(' ')[0];
-      
-      // Update just the span with the name
-      const nameSpan = document.getElementById('user-first-name');
-      if (nameSpan) {
-        nameSpan.textContent = firstName;
-        console.log('Name updated to:', firstName);
-      } else {
-        console.log('Name span not found');
-      }
-    } else {
-      console.log('No profile found for user');
-    }
-  } catch (error) {
-    console.error('Error:', error);
+  if (!currentUser) return;
+
+  const welcomeHeader = document.getElementById('welcome-header');
+  const nameSpan = document.getElementById('user-first-name');
+  if (!nameSpan) return;
+
+  // Hide header until name is ready — prevents flash of empty content
+  if (welcomeHeader) welcomeHeader.style.visibility = 'hidden';
+
+  let firstName = null;
+
+  // Auth metadata is instant — populated at signUp, no network call needed
+  const metaName = currentUser.user_metadata?.full_name;
+  if (metaName) {
+    firstName = metaName.split(' ')[0];
   }
+
+  // Fallback to profiles table only if metadata is missing
+  if (!firstName) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', currentUser.id)
+        .single();
+      if (profile?.full_name) {
+        firstName = profile.full_name.split(' ')[0];
+      }
+    } catch (e) {
+      // profiles table may not exist — that's fine
+    }
+  }
+
+  if (firstName) {
+    nameSpan.textContent = firstName;
+  }
+
+  // Reveal header only once name is set
+  if (welcomeHeader) welcomeHeader.style.visibility = 'visible';
 }
+
 // Load applications from Supabase
 async function loadApplications() {
   const { data, error } = await getAllApplications();
-  
+
   if (error) {
     console.error('Error loading applications:', error);
     showToast('Error loading applications', 'error');
     return;
   }
-  
+
   applications = data || [];
   renderApplications();
   updateStats();
@@ -100,16 +103,8 @@ async function loadApplications() {
 // Page navigation
 export function showPage(pageId) {
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  
-  if (pageId === 'dashboard-page') {
-    // Wait a bit for DOM to be ready, then update welcome message
-    setTimeout(async () => {
-      await updateWelcomeMessage();
-      loadApplications();
-    }, 100);
-    closeSidebar();
-  }
+  const el = document.getElementById(pageId);
+  if (el) el.classList.add('active');
 }
 
 // Sidebar functions
@@ -117,7 +112,6 @@ export function toggleSidebar() {
   sidebarOpen = !sidebarOpen;
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  
   if (sidebarOpen) {
     sidebar.classList.remove('collapsed');
     overlay.classList.add('active');
@@ -129,11 +123,14 @@ export function toggleSidebar() {
 
 export function closeSidebar() {
   sidebarOpen = false;
-  document.getElementById('app-sidebar').classList.add('collapsed');
-  document.getElementById('sidebar-overlay').classList.remove('active');
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.add('collapsed');
+  if (overlay) overlay.classList.remove('active');
 }
 
 // Dashboard view navigation
+// Welcome dismisses on first meaningful navigation away from overview
 export function setDashboardView(view) {
   document.querySelectorAll('.dashboard-view').forEach(v => {
     v.classList.add('hidden');
@@ -147,31 +144,18 @@ export function setDashboardView(view) {
 
   const welcomeHeader = document.getElementById('welcome-header');
   if (welcomeHeader) {
-    const leftContent = welcomeHeader.querySelector('.welcome-content');
-
-    const shouldShowInOverview = view === 'overview' && shouldShowWelcome();
-
-    if (shouldShowInOverview) {
+    if (view === 'overview' && shouldShowWelcome()) {
+      // Back on overview and not yet dismissed — show it
       welcomeHeader.style.display = '';
-      if (leftContent) leftContent.style.display = '';
-
-      if (welcomeTimer) {
-        clearTimeout(welcomeTimer);
+    } else if (view !== 'overview') {
+      // User navigated to another section — dismiss welcome permanently
+      if (!welcomeDismissed) {
+        welcomeDismissed = true;
+        markWelcomeSeen();
       }
-      welcomeTimer = setTimeout(() => {
-        closeWelcomePopup();
-      }, 7000);
-    } else {
       welcomeHeader.style.display = 'none';
-      if (leftContent) leftContent.style.display = 'none';
-      if (welcomeTimer) {
-        clearTimeout(welcomeTimer);
-        welcomeTimer = null;
-      }
     }
   }
-  
-  // Add Application button always visible on dashboard page (all views)
 
   document.querySelectorAll('.sidebar-item').forEach(item => {
     item.classList.remove('active');
@@ -179,13 +163,16 @@ export function setDashboardView(view) {
   });
 
   closeSidebar();
-
   if (view === 'calendar') renderCalendar();
   if (view === 'reminders') renderReminders();
 }
 
 // Modal functions
+// Opening a modal = first meaningful interaction — dismiss welcome
 export function openModal(type) {
+  if (!welcomeDismissed) {
+    closeWelcomePopup();
+  }
   document.getElementById(`modal-${type}`).classList.remove('hidden');
 }
 
@@ -196,34 +183,30 @@ export function closeModal(type) {
   }
 }
 
-// Close the welcome popup immediately and clear timer
+// Dismiss welcome — called by ✕ button or on first interaction
 export function closeWelcomePopup() {
   const welcomeHeader = document.getElementById('welcome-header');
-  if (!welcomeHeader) return;
-  const leftContent = welcomeHeader.querySelector('.welcome-content');
-  if (leftContent) leftContent.style.display = 'none';
-  welcomeHeader.style.display = 'none';
-  if (welcomeTimer) { clearTimeout(welcomeTimer); welcomeTimer = null; }
+  if (welcomeHeader) welcomeHeader.style.display = 'none';
+  welcomeDismissed = true;
   markWelcomeSeen();
 }
 
 // Toast notifications
 export function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
+  if (!container) return;
   const toast = document.createElement('div');
   toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg animate-slide-in ${
     type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-maroon-600'
   } text-white`;
-  
   toast.innerHTML = `
     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      ${type === 'success' 
+      ${type === 'success'
         ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>'
         : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'}
     </svg>
     <span class="font-medium">${message}</span>
   `;
-  
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -243,25 +226,19 @@ function getStatusBadge(status) {
   return `<span class="px-3 py-1 ${config.bg} ${config.text} text-xs font-semibold rounded-full">${config.label}</span>`;
 }
 
-function formatDate(dateStr) {
-  if (!dateStr) return 'No deadline';
-  const date = new Date(dateStr);
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
 function daysUntil(dateStr) {
   if (!dateStr) return null;
   const deadline = new Date(dateStr);
   const today = new Date();
-  const diff = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
-  return diff;
+  return Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
 }
 
 // Render applications
 function renderApplications() {
   const recentContainer = document.getElementById('recent-applications');
   const allContainer = document.getElementById('all-applications');
-  
+  if (!recentContainer || !allContainer) return;
+
   if (applications.length === 0) {
     const emptyState = `
       <div class="text-center py-12 text-gray-400">
@@ -270,22 +247,20 @@ function renderApplications() {
         </svg>
         <p class="text-lg font-medium">No applications yet</p>
         <p class="text-sm">Click "Add Application" to get started!</p>
-      </div>
-    `;
+      </div>`;
     recentContainer.innerHTML = emptyState;
     allContainer.innerHTML = emptyState;
     return;
   }
-  
+
   const sortedApps = [...applications].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-  
+
   const renderCard = (app) => {
     const days = daysUntil(app.deadline);
-    const daysText = days !== null 
+    const daysText = days !== null
       ? (days < 0 ? 'Overdue' : days === 0 ? 'Due today' : `Due in ${days} days`)
       : 'No deadline';
     const daysClass = days !== null && days <= 3 ? 'text-red-600' : 'text-gray-500';
-    
     return `
       <div class="bg-white border border-gray-100 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:shadow-md transition-all group gap-4 sm:gap-0" data-id="${app.id}">
         <div class="flex-1 min-w-0">
@@ -311,10 +286,9 @@ function renderApplications() {
             </svg>
           </button>
         </div>
-      </div>
-    `;
+      </div>`;
   };
-  
+
   recentContainer.innerHTML = sortedApps.slice(0, 5).map(renderCard).join('');
   allContainer.innerHTML = sortedApps.map(renderCard).join('');
 }
@@ -322,9 +296,7 @@ function renderApplications() {
 // Update statistics
 async function updateStats() {
   const stats = await getStats();
-  
   if (!stats) return;
-  
   document.getElementById('stat-total').textContent = stats.total;
   document.getElementById('stat-progress').textContent = stats.inProgress;
   document.getElementById('stat-awaiting').textContent = stats.awaiting;
@@ -334,8 +306,11 @@ async function updateStats() {
 // Render calendar view
 function renderCalendar() {
   const container = document.getElementById('calendar-deadlines');
-  const appsWithDeadlines = applications.filter(a => a.deadline).sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-  
+  if (!container) return;
+  const appsWithDeadlines = applications
+    .filter(a => a.deadline)
+    .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
   if (appsWithDeadlines.length === 0) {
     container.innerHTML = `
       <div class="text-center py-12 text-gray-400">
@@ -344,15 +319,13 @@ function renderCalendar() {
         </svg>
         <p class="text-lg font-medium">No deadlines set</p>
         <p class="text-sm">Add applications with deadlines to see them here</p>
-      </div>
-    `;
+      </div>`;
     return;
   }
-  
+
   container.innerHTML = appsWithDeadlines.map(app => {
     const days = daysUntil(app.deadline);
     const urgent = days !== null && days <= 7;
-    
     return `
       <div class="flex items-center gap-4 p-4 rounded-xl ${urgent ? 'bg-red-50 border border-red-200' : 'bg-white border border-gray-100'}">
         <div class="w-14 h-14 rounded-xl ${urgent ? 'bg-red-100' : 'bg-maroon-100'} flex flex-col items-center justify-center flex-shrink-0">
@@ -366,16 +339,18 @@ function renderCalendar() {
         <div class="text-right flex-shrink-0">
           <span class="text-sm font-medium ${urgent ? 'text-red-600' : 'text-gray-600'}">${days < 0 ? 'Overdue' : days === 0 ? 'Due today' : `${days} days left`}</span>
         </div>
-      </div>
-    `;
+      </div>`;
   }).join('');
 }
 
 // Render reminders
 function renderReminders() {
   const container = document.getElementById('reminders-list');
-  const appsWithReminders = applications.filter(a => a.reminder).sort((a, b) => new Date(a.reminder) - new Date(b.reminder));
-  
+  if (!container) return;
+  const appsWithReminders = applications
+    .filter(a => a.reminder)
+    .sort((a, b) => new Date(a.reminder) - new Date(b.reminder));
+
   if (appsWithReminders.length === 0) {
     container.innerHTML = `
       <div class="text-center py-12 text-gray-400">
@@ -384,15 +359,13 @@ function renderReminders() {
         </svg>
         <p class="text-lg font-medium">No reminders set</p>
         <p class="text-sm">Add reminders to your applications to stay on track</p>
-      </div>
-    `;
+      </div>`;
     return;
   }
-  
+
   container.innerHTML = appsWithReminders.map(app => {
     const reminderDate = new Date(app.reminder);
     const isPast = reminderDate < new Date();
-    
     return `
       <div class="flex items-center gap-4 p-4 rounded-xl ${isPast ? 'bg-orange-50 border border-orange-200' : 'bg-white border border-gray-100'}">
         <div class="w-12 h-12 rounded-xl ${isPast ? 'bg-orange-100' : 'bg-maroon-100'} flex items-center justify-center flex-shrink-0">
@@ -402,68 +375,53 @@ function renderReminders() {
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="font-semibold text-gray-800 truncate">${app.name}</h3>
-          <p class="text-sm text-gray-500 truncate">${reminderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} at ${reminderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
+          <p class="text-sm text-gray-500 truncate">
+            ${reminderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            at ${reminderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+          </p>
         </div>
-        <button onclick="window.clearReminder('${app.id}')" class="text-sm text-gray-500 hover:text-red-600 transition-colors flex-shrink-0">
-          Dismiss
-        </button>
-      </div>
-    `;
+        <button onclick="window.clearReminder('${app.id}')" class="text-sm text-gray-500 hover:text-red-600 transition-colors flex-shrink-0">Dismiss</button>
+      </div>`;
   }).join('');
 }
-// ── Payment flow ───────────────────────────────────────────────────────────────
-// Store pending form data in sessionStorage, redirect to payment page
-function goToPayment(actionType, formData) {
-  sessionStorage.setItem("scholaco_pending_action", JSON.stringify({
-    type: actionType,
-    data: formData
-  }));
-  window.location.href = "payment.html";
-}
 
-// Add application — collect form data then redirect to payment
+// Add application
 export async function addApplication(e) {
   e.preventDefault();
-  if (applications.length >= 999) {
-    showToast("Maximum limit of 999 applications reached", "error");
-    return;
-  }
+
   const btn = document.getElementById('add-app-btn');
   btn.disabled = true;
   btn.textContent = 'Adding...';
-  
+
   const appData = {
     name: document.getElementById('app-name').value,
     organization: document.getElementById('app-org').value,
     amount: document.getElementById('app-amount').value,
-    deadline: document.getElementById('app-deadline').value,
+    deadline: document.getElementById('app-deadline').value || null,
     status: document.getElementById('app-status').value,
-    reminder: document.getElementById('app-reminder').value,
+    reminder: document.getElementById('app-reminder').value || null,
     notes: document.getElementById('app-notes').value
   };
-  
-  const { data, error } = await createApplication(appData);
-  
+
+  const { error } = await createApplication(appData);
+
   if (error) {
-    showToast('Failed to add application', 'error');
+    console.error('Add application error:', error);
+    showToast(`Failed to add application: ${error.message}`, 'error');
   } else {
     showToast('Application added successfully!');
     closeModal('add-application');
     await loadApplications();
   }
-  
+
   btn.disabled = false;
   btn.textContent = 'Add Application';
-  closeModal("add-application");
-  // redirect to payment if needed — pass the collected appData
-  goToPayment("add_application", appData);
 }
 
 // Edit application
 export function editApplication(id) {
   const app = applications.find(a => a.id === id);
   if (!app) return;
-  
   currentEditApp = app;
   document.getElementById('edit-app-id').value = app.id;
   document.getElementById('edit-app-name').value = app.name || '';
@@ -473,50 +431,49 @@ export function editApplication(id) {
   document.getElementById('edit-app-status').value = app.status || 'not_started';
   document.getElementById('edit-app-reminder').value = app.reminder || '';
   document.getElementById('edit-app-notes').value = app.notes || '';
-  
   openModal('edit-application');
 }
 
 // Save edited application
 export async function saveApplication(e) {
   e.preventDefault();
-  
+
   const btn = document.getElementById('edit-app-btn');
   btn.disabled = true;
   btn.textContent = 'Saving...';
-  
+
   const updates = {
     name: document.getElementById('edit-app-name').value,
     organization: document.getElementById('edit-app-org').value,
     amount: document.getElementById('edit-app-amount').value,
-    deadline: document.getElementById('edit-app-deadline').value,
+    deadline: document.getElementById('edit-app-deadline').value || null,
     status: document.getElementById('edit-app-status').value,
-    reminder: document.getElementById('edit-app-reminder').value,
+    reminder: document.getElementById('edit-app-reminder').value || null,
     notes: document.getElementById('edit-app-notes').value
   };
-  
+
   const { error } = await updateApplication(currentEditApp.id, updates);
-  
+
   if (error) {
-    showToast('Failed to update application', 'error');
+    console.error('Save application error:', error);
+    showToast(`Failed to update application: ${error.message}`, 'error');
   } else {
     showToast('Application updated successfully!');
     closeModal('edit-application');
     await loadApplications();
-    
-    // Send email if status changed to awaiting
     if (updates.status === 'awaiting' && currentUser) {
       await sendApplicationSubmitted(currentUser.email, updates.name);
     }
   }
-  
+
   btn.disabled = false;
   btn.textContent = 'Save Changes';
 }
 
-// Confirm and delete application
+// Confirm and delete
 export function confirmDelete(id) {
   const btn = document.querySelector(`[data-id="${id}"] .delete-btn`);
+  if (!btn) return;
   if (btn.dataset.confirming) {
     handleDelete(id);
   } else {
@@ -535,7 +492,6 @@ export function confirmDelete(id) {
 
 async function handleDelete(id) {
   const { error } = await deleteApplication(id);
-  
   if (error) {
     showToast('Failed to delete application', 'error');
   } else {
@@ -544,10 +500,8 @@ async function handleDelete(id) {
   }
 }
 
-// Clear reminder
 export async function clearReminder(id) {
   const { error } = await updateApplication(id, { reminder: null });
-  
   if (error) {
     showToast('Failed to clear reminder', 'error');
   } else {
@@ -556,56 +510,42 @@ export async function clearReminder(id) {
   }
 }
 
-// Form handlers for auth
+// Auth handlers
 export async function handleLogin(e) {
   e.preventDefault();
-  
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
-  
   const { error } = await signIn(email, password);
-  
   if (error) {
     showToast(error.message, 'error');
   } else {
     setWelcomeTrigger();
     showToast('Welcome back!');
-    showPage('dashboard-page');
-    setDashboardView('overview');
+    window.location.href = 'dashboard.html';
   }
 }
 
 export async function handleSignup(e) {
   e.preventDefault();
-  
   const firstName = document.getElementById('signup-first').value;
   const lastName = document.getElementById('signup-last').value;
   const email = document.getElementById('signup-email').value;
   const password = document.getElementById('signup-password').value;
-  
   const fullName = `${firstName} ${lastName}`;
-  
   const { error } = await signUp(email, password, fullName);
-  
   if (error) {
     showToast(error.message, 'error');
   } else {
     setWelcomeTrigger();
-    showToast('Account created successfully!');
+    showToast('Account created! Check your email to confirm.');
     await sendWelcomeEmail(email, fullName);
-    showPage('dashboard-page');
-    setDashboardView('overview');
+    window.location.href = 'dashboard.html';
   }
 }
 
-export async function handleSignOut() {
-  clearWelcomeState();
-  // Sign out from Supabase and clear session
-  await signOut();
-}
-
-// Make functions available globally for backwards compatibility
-// (only those still used by old inline handlers if any remain)
+// --- Global window assignments ---
+// We wire the new bulletproof signOutUser here as a fallback for any inline onclicks
+window.handleSignOut = signOutUser;
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
 window.setDashboardView = setDashboardView;
@@ -615,174 +555,107 @@ window.editApplication = editApplication;
 window.confirmDelete = confirmDelete;
 window.clearReminder = clearReminder;
 window.closeWelcomePopup = closeWelcomePopup;
-// Also expose form and lifecycle handlers used by inline scripts
 window.initApp = initApp;
 window.addApplication = addApplication;
 window.saveApplication = saveApplication;
-window.loadApplications = loadApplications;
-window.createApplication = createApplication;
-window.updateApplication = updateApplication;
-
-function wireDashboardActions() {
-  document.querySelectorAll('[data-view]').forEach(el => {
-    el.addEventListener('click', () => setDashboardView(el.dataset.view));
-  });
-
-  document.querySelectorAll('[data-modal-close]').forEach(el => {
-    el.addEventListener('click', () => closeModal(el.dataset.modalClose));
-  });
-
-  const welcomeDismiss = document.getElementById('welcome-dismiss');
-  if (welcomeDismiss) {
-    welcomeDismiss.addEventListener('click', closeWelcomePopup);
-  }
-
-  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
-    backdrop.addEventListener('click', (e) => {
-      if (e.target !== backdrop) return;
-      const modal = backdrop.closest('[id^="modal-"]');
-      if (!modal) return;
-      closeModal(modal.id.replace('modal-', ''));
-    });
-  });
-}
-
-// helper for filter dropdown
-function handleFilterChange(e) {
-  const status = e.target.value;
-  const cards = document.querySelectorAll('#all-applications > div[data-id]');
-  cards.forEach(card => {
-    const app = applications.find(a => a.id === card.dataset.id);
-    card.style.display = (status === 'all' || app?.status === status) ? 'flex' : 'none';
-  });
-}
-
-// handle any pending action after returning from payment page
-async function handlePendingPayment() {
-  const paymentDone = sessionStorage.getItem('scholaco_payment_complete');
-  if (!paymentDone) return;
-  sessionStorage.removeItem('scholaco_payment_complete');
-  const raw = sessionStorage.getItem('scholaco_pending_action');
-  if (raw) {
-    const action = JSON.parse(raw);
-    sessionStorage.removeItem('scholaco_pending_action');
-    if (action.type === 'add_application') {
-      const { data, error } = await createApplication(action.data);
-      if (!error) showToast('Application added successfully! 🎉');
-      else showToast('Failed to add application', 'error');
-    } else if (action.type === 'edit_application') {
-      const { error } = await updateApplication(action.data.id, action.data);
-      if (!error) showToast('Application updated successfully!');
-      else showToast('Failed to update application', 'error');
-    }
-    await loadApplications();
-  }
-}
-
-// run wiring after DOM loads so we don't rely on inline handlers anywhere
-window.addEventListener('DOMContentLoaded', async () => {
-  wireDashboardActions();
-
-  // wire remaining interactive elements
-  const addForm = document.getElementById('add-application-form');
-  if (addForm) addForm.addEventListener('submit', addApplication);
-  const editForm = document.getElementById('edit-application-form');
-  if (editForm) editForm.addEventListener('submit', saveApplication);
-  const filter = document.getElementById('filter-status');
-  if (filter) filter.addEventListener('change', handleFilterChange);
-
-  // modal opener for add application button
-  const addBtn = document.getElementById('add-application-button');
-  if (addBtn) addBtn.addEventListener('click', () => openModal('add-application'));
-
-  // sign out link should run the sign-out logic, not just navigate
-  const signOutLink = document.querySelector('a[href="index.html"]');
-  if (signOutLink) {
-    signOutLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      await handleSignOut();
-      window.location.href = 'index.html';
-    });
-  }
-
-  // initialize application state and run any pending action
-  await initApp();
-  await handlePendingPayment();
-
-  setDashboardView('overview');
-});
-
-// Email integration functions
 window.connectGmail = connectGmail;
 window.connectOutlook = connectOutlook;
 window.connectYahoo = connectYahoo;
 window.configureOtherEmail = configureOtherEmail;
 
-// Email Integration Functions
+// --- DOM wiring ---
+function wireDashboardActions() {
+  document.querySelectorAll('[data-view]').forEach(el => {
+    el.addEventListener('click', () => setDashboardView(el.dataset.view));
+  });
+  document.querySelectorAll('[data-modal-close]').forEach(el => {
+    el.addEventListener('click', () => closeModal(el.dataset.modalClose));
+  });
+  const welcomeDismiss = document.getElementById('welcome-dismiss');
+  if (welcomeDismiss) welcomeDismiss.addEventListener('click', closeWelcomePopup);
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target !== backdrop) return;
+      const modal = backdrop.closest('[id^="modal-"]');
+      if (modal) closeModal(modal.id.replace('modal-', ''));
+    });
+  });
+}
+
+function handleFilterChange(e) {
+  const status = e.target.value;
+  document.querySelectorAll('#all-applications > div[data-id]').forEach(card => {
+    const app = applications.find(a => a.id === card.dataset.id);
+    card.style.display = (status === 'all' || app?.status === status) ? 'flex' : 'none';
+  });
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  wireDashboardActions();
+
+  const addForm = document.getElementById('add-application-form');
+  if (addForm) addForm.addEventListener('submit', addApplication);
+  
+  const editForm = document.getElementById('edit-application-form');
+  if (editForm) editForm.addEventListener('submit', saveApplication);
+  
+  const filter = document.getElementById('filter-status');
+  if (filter) filter.addEventListener('change', handleFilterChange);
+  
+  const addBtn = document.getElementById('add-application-button');
+  if (addBtn) addBtn.addEventListener('click', () => openModal('add-application'));
+
+  // The Glue: Attach the robust sign-out function to the button by ID
+  const signOutBtn = document.getElementById('signOutBtn');
+  if (signOutBtn) signOutBtn.addEventListener('click', signOutUser);
+
+  // In case you have a global mobile nav sign out button as well
+  const globalSignOutBtn = document.getElementById('globalSignOutBtn');
+  if (globalSignOutBtn) globalSignOutBtn.addEventListener('click', signOutUser);
+
+  await initApp();
+  setDashboardView('overview');
+});
+
+// Email integration stubs
 export function connectGmail() {
-  showToast('Gmail integration coming soon! For now, you can manually check your emails.', 'info');
-  // TODO: Implement Gmail OAuth flow
-  // This would require backend API to handle OAuth tokens
+  showToast('Gmail integration coming soon!', 'info');
 }
-
 export function connectOutlook() {
-  showToast('Outlook integration coming soon! For now, you can manually check your emails.', 'info');
-  // TODO: Implement Microsoft OAuth flow
+  showToast('Outlook integration coming soon!', 'info');
 }
-
 export function connectYahoo() {
-  showToast('Yahoo Mail integration coming soon! For now, you can manually check your emails.', 'info');
-  // TODO: Implement Yahoo OAuth flow
+  showToast('Yahoo Mail integration coming soon!', 'info');
 }
-
 export function configureOtherEmail() {
-  showToast('IMAP/SMTP configuration coming soon! For now, you can manually check your emails.', 'info');
-  // TODO: Implement IMAP/SMTP configuration
+  showToast('IMAP/SMTP configuration coming soon!', 'info');
 }
 
+// Welcome state helpers
 function shouldShowWelcome() {
   return hasWelcomeTrigger() && !hasSeenWelcome();
 }
-
 function setWelcomeTrigger() {
   try {
     sessionStorage.setItem(WELCOME_TRIGGER_KEY, 'true');
     sessionStorage.removeItem(WELCOME_SEEN_KEY);
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
 }
-
 function hasWelcomeTrigger() {
-  try {
-    return sessionStorage.getItem(WELCOME_TRIGGER_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+  try { return sessionStorage.getItem(WELCOME_TRIGGER_KEY) === 'true'; } catch (e) { return false; }
 }
-
 function hasSeenWelcome() {
-  try {
-    return sessionStorage.getItem(WELCOME_SEEN_KEY) === 'true';
-  } catch (e) {
-    return false;
-  }
+  try { return sessionStorage.getItem(WELCOME_SEEN_KEY) === 'true'; } catch (e) { return false; }
 }
-
 function markWelcomeSeen() {
   try {
     sessionStorage.setItem(WELCOME_SEEN_KEY, 'true');
     sessionStorage.removeItem(WELCOME_TRIGGER_KEY);
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
 }
-
 function clearWelcomeState() {
   try {
     sessionStorage.removeItem(WELCOME_TRIGGER_KEY);
     sessionStorage.removeItem(WELCOME_SEEN_KEY);
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) {}
 }
