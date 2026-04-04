@@ -198,7 +198,7 @@ export function showToast(message, type = 'success') {
   const toast = document.createElement('div');
   toast.className = `flex items-center gap-3 px-5 py-4 rounded-xl shadow-lg animate-slide-in ${
     type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-maroon-600'
-  } text-white`;
+  } text-white z-50 relative`;
   toast.innerHTML = `
     <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       ${type === 'success'
@@ -213,6 +213,18 @@ export function showToast(message, type = 'success') {
     toast.style.transform = 'translateX(20px)';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+// --- Security Helper ---
+// Prevents XSS attacks by sanitizing user input before rendering HTML
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 // Helper functions
@@ -261,16 +273,17 @@ function renderApplications() {
       ? (days < 0 ? 'Overdue' : days === 0 ? 'Due today' : `Due in ${days} days`)
       : 'No deadline';
     const daysClass = days !== null && days <= 3 ? 'text-red-600' : 'text-gray-500';
+    
     return `
       <div class="bg-white border border-gray-100 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between hover:shadow-md transition-all group gap-4 sm:gap-0" data-id="${app.id}">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-1 flex-wrap">
-            <h3 class="font-semibold text-gray-800 truncate">${app.name}</h3>
+            <h3 class="font-semibold text-gray-800 truncate">${escapeHTML(app.name)}</h3>
             ${getStatusBadge(app.status)}
           </div>
           <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm flex-wrap">
-            <span class="text-gray-500">${app.organization || 'No organization'}</span>
-            <span class="text-maroon-600 font-medium">${app.amount || 'Amount TBD'}</span>
+            <span class="text-gray-500">${escapeHTML(app.organization) || 'No organization'}</span>
+            <span class="text-maroon-600 font-medium">${escapeHTML(app.amount) || 'Amount TBD'}</span>
             <span class="${daysClass}">${daysText}</span>
           </div>
         </div>
@@ -333,8 +346,8 @@ function renderCalendar() {
           <span class="text-lg ${urgent ? 'text-red-700' : 'text-maroon-700'} font-bold">${new Date(app.deadline).getDate()}</span>
         </div>
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-gray-800 truncate">${app.name}</h3>
-          <p class="text-sm text-gray-500 truncate">${app.organization || 'No organization'} • ${app.amount || 'Amount TBD'}</p>
+          <h3 class="font-semibold text-gray-800 truncate">${escapeHTML(app.name)}</h3>
+          <p class="text-sm text-gray-500 truncate">${escapeHTML(app.organization) || 'No organization'} • ${escapeHTML(app.amount) || 'Amount TBD'}</p>
         </div>
         <div class="text-right flex-shrink-0">
           <span class="text-sm font-medium ${urgent ? 'text-red-600' : 'text-gray-600'}">${days < 0 ? 'Overdue' : days === 0 ? 'Due today' : `${days} days left`}</span>
@@ -374,7 +387,7 @@ function renderReminders() {
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <h3 class="font-semibold text-gray-800 truncate">${app.name}</h3>
+          <h3 class="font-semibold text-gray-800 truncate">${escapeHTML(app.name)}</h3>
           <p class="text-sm text-gray-500 truncate">
             ${reminderDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             at ${reminderDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
@@ -525,27 +538,65 @@ export async function handleLogin(e) {
   }
 }
 
+// Security: Frontend email validation bouncer
 export async function handleSignup(e) {
   e.preventDefault();
-  const firstName = document.getElementById('signup-first').value;
-  const lastName = document.getElementById('signup-last').value;
-  const email = document.getElementById('signup-email').value;
+  console.log("Signup clicked! Checking email format...");
+  
+  const firstName = document.getElementById('signup-first').value.trim();
+  const lastName = document.getElementById('signup-last').value.trim();
+  const email = document.getElementById('signup-email').value.trim().toLowerCase();
   const password = document.getElementById('signup-password').value;
+  
+  // 1. Basic Regex: Ensure it actually looks like an email (something@something.something)
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    showToast('Please enter a valid email format.', 'error');
+    return;
+  }
+
+  // 2. The Bouncer: Block obvious dummy and disposable domains
+  const blockedDomains = [
+    'email.com', 'test.com', 'example.com', 'mailinator.com', 
+    'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'yopmail.com',
+    'trashmail.com', 'fakemail.net'
+  ];
+  
+  const domain = email.split('@')[1];
+  if (blockedDomains.includes(domain)) {
+    showToast('Temporary or dummy email domains are not allowed.', 'error');
+    return;
+  }
+
+  // Change button state so they know it's working
+  const btn = e.target.querySelector('button[type="submit"]');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
   const fullName = `${firstName} ${lastName}`;
   const { error } = await signUp(email, password, fullName);
+  
   if (error) {
     showToast(error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = originalText;
   } else {
     setWelcomeTrigger();
     showToast('Account created! Check your email to confirm.');
-    await sendWelcomeEmail(email, fullName);
-    window.location.href = 'dashboard.html';
+    
+    // We don't await the email so the UI feels instant
+    sendWelcomeEmail(email, fullName).catch(err => console.error("Welcome email failed", err));
+    
+    document.getElementById('signup-form').reset();
+    btn.textContent = 'Verification Sent';
   }
 }
 
 // --- Global window assignments ---
-// We wire the new bulletproof signOutUser here as a fallback for any inline onclicks
 window.handleSignOut = signOutUser;
+window.handleLogin = handleLogin;
+window.handleSignup = handleSignup;
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
 window.setDashboardView = setDashboardView;
@@ -593,6 +644,20 @@ function handleFilterChange(e) {
 window.addEventListener('DOMContentLoaded', async () => {
   wireDashboardActions();
 
+  // Catch the email verification redirect and show toast
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('verified') === 'true') {
+    showToast('Email verified! You can now log in.', 'success');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // Explicitly wire the auth forms to their functions
+  const signupForm = document.getElementById('signup-form');
+  if (signupForm) signupForm.addEventListener('submit', handleSignup);
+
+  const loginForm = document.getElementById('login-form');
+  if (loginForm) loginForm.addEventListener('submit', handleLogin);
+
   const addForm = document.getElementById('add-application-form');
   if (addForm) addForm.addEventListener('submit', addApplication);
   
@@ -605,16 +670,18 @@ window.addEventListener('DOMContentLoaded', async () => {
   const addBtn = document.getElementById('add-application-button');
   if (addBtn) addBtn.addEventListener('click', () => openModal('add-application'));
 
-  // The Glue: Attach the robust sign-out function to the button by ID
   const signOutBtn = document.getElementById('signOutBtn');
   if (signOutBtn) signOutBtn.addEventListener('click', signOutUser);
 
-  // In case you have a global mobile nav sign out button as well
   const globalSignOutBtn = document.getElementById('globalSignOutBtn');
   if (globalSignOutBtn) globalSignOutBtn.addEventListener('click', signOutUser);
 
   await initApp();
-  setDashboardView('overview');
+  
+  // Only set dashboard view if we are actually on the dashboard HTML page
+  if (document.getElementById('dashboard-overview')) {
+    setDashboardView('overview');
+  }
 });
 
 // Email integration stubs
