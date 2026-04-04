@@ -128,9 +128,9 @@ Scholaco is designed to be deployed across two distinct platforms to maximize fr
 
 ## 👨‍💻 Author
 
-**Alex Marvellous** \* **X (Twitter):** [@Alexa\_The\_Dev](https://www.google.com/search?q=https://twitter.com/Alexa_The_Dev)
-
-  * **Email:** marvellousalex1@gmail.com
+**Alex Marvellous** 
+* **X (Twitter):** [@Alexa\_The\_Dev](https://www.google.com/search?q=https://twitter.com/Alexa_The_Dev)
+* **Email:** marvellousalex1@gmail.com
 
 **Giwa Fatimoh** 
 * **Email:** fatimoh.giwa.w@gmail.com
