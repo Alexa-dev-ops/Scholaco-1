@@ -1,7 +1,8 @@
 /**
  * Scholaco Main App Logic
  */
-
+import { inject } from '@vercel/analytics';
+inject();
 import { supabase, getCurrentUser, signIn, signUp, signOutUser, isSupabaseConfigured } from './supabase.js';
 import { getAllApplications, createApplication, updateApplication, deleteApplication, getStats } from './applications.js';
 import { sendWelcomeEmail, sendDeadlineReminder, sendApplicationSubmitted } from './brevo.js';
