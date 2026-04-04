@@ -133,3 +133,5 @@ Scholaco is designed to be deployed across two distinct platforms to maximize fr
   * **Email:** marvellousalex1@gmail.com
 
 **Giwa Fatimoh** 
+* **Email:** fatimoh.giwa.w@gmail.com
+* **X(Twitter)**:@The\_Nexra
