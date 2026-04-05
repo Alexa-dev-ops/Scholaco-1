@@ -113,12 +113,23 @@ export function toggleSidebar() {
   sidebarOpen = !sidebarOpen;
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
+  const main = document.getElementById('main-content');
+  if (!sidebar || !overlay) return;
+
   if (sidebarOpen) {
-    sidebar.classList.remove('collapsed');
-    overlay.classList.add('active');
+    sidebar.classList.remove('sidebar-collapsed');
+    sidebar.classList.remove('-translate-x-full');
+    if (main) main.style.marginLeft = window.innerWidth >= 768 ? '16rem' : '0';
+    if (window.innerWidth < 768) {
+      overlay.classList.remove('hidden');
+    }
   } else {
-    sidebar.classList.add('collapsed');
-    overlay.classList.remove('active');
+    sidebar.classList.add('sidebar-collapsed');
+    if (main) main.style.marginLeft = '0';
+    if (window.innerWidth < 768) {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
   }
 }
 
@@ -126,8 +137,15 @@ export function closeSidebar() {
   sidebarOpen = false;
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.add('collapsed');
-  if (overlay) overlay.classList.remove('active');
+  const main = document.getElementById('main-content');
+  if (!sidebar || !overlay) return;
+
+  sidebar.classList.add('sidebar-collapsed');
+  if (main) main.style.marginLeft = '0';
+  if (window.innerWidth < 768) {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  }
 }
 
 // Dashboard view navigation
@@ -600,6 +618,7 @@ window.handleLogin = handleLogin;
 window.handleSignup = handleSignup;
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
+window.closeSidebar = closeSidebar;
 window.setDashboardView = setDashboardView;
 window.openModal = openModal;
 window.closeModal = closeModal;
@@ -614,6 +633,18 @@ window.connectGmail = connectGmail;
 window.connectOutlook = connectOutlook;
 window.connectYahoo = connectYahoo;
 window.configureOtherEmail = configureOtherEmail;
+window.toggleMobileMenu = function () {
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('-translate-x-full');
+  if (overlay) overlay.classList.remove('hidden');
+};
+window.closeMobileMenu = function () {
+  const sidebar = document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.add('-translate-x-full');
+  if (overlay) overlay.classList.add('hidden');
+};
 
 // --- DOM wiring ---
 function wireDashboardActions() {
@@ -632,6 +663,29 @@ function wireDashboardActions() {
       if (modal) closeModal(modal.id.replace('modal-', ''));
     });
   });
+
+  // Sidebar event listeners
+  const hamburgerBtn = document.getElementById('hamburger-menu');
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener('click', toggleSidebar);
+  }
+
+  const closeMobileBtn = document.getElementById('sidebar-close-mobile');
+  if (closeMobileBtn) {
+    closeMobileBtn.addEventListener('click', closeSidebar);
+  }
+
+  const closeDesktopBtn = document.getElementById('sidebar-close-desktop');
+  if (closeDesktopBtn) {
+    closeDesktopBtn.addEventListener('click', toggleSidebar);
+  }
+
+  const sidebarNav = document.getElementById('sidebar-nav');
+  if (sidebarNav) {
+    sidebarNav.addEventListener('click', () => {
+      if (window.innerWidth < 768) closeSidebar();
+    });
+  }
 }
 
 function handleFilterChange(e) {
@@ -642,7 +696,7 @@ function handleFilterChange(e) {
   });
 }
 
-window.addEventListener('DOMContentLoaded', async () => {
+(async () => {
   wireDashboardActions();
 
   // Catch the email verification redirect and show toast
@@ -679,11 +733,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   await initApp();
   
+  // Initialize sidebar state
+  const main = document.getElementById('main-content');
+  if (main && window.innerWidth >= 768) {
+    main.style.marginLeft = '16rem';
+    sidebarOpen = true;
+  }
+  
   // Only set dashboard view if we are actually on the dashboard HTML page
   if (document.getElementById('dashboard-overview')) {
     setDashboardView('overview');
   }
-});
+})();
 
 // Email integration stubs
 export function connectGmail() {

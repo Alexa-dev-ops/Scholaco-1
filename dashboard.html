@@ -32,11 +32,6 @@
       box-sizing: border-box;
     }
 
-<<<<<<< HEAD
-    /* Forces scrollbars on mobile to be neat */
-    .mobile-scroll {
-      -webkit-overflow-scrolling: touch;
-=======
     .sidebar-collapsed {
       width: 0 !important;
       min-width: 0 !important;
@@ -52,7 +47,6 @@
 
     .sidebar-item.active svg {
       color: #a91e43;
->>>>>>> bad5a6d2f50a71399ba846f9bf17de84899a799b
     }
   </style>
 
@@ -88,11 +82,12 @@
             <div class="flex items-center gap-3">
               <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto">
             </div>
-<<<<<<< HEAD
-            <button onclick="window.closeMobileMenu()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
-=======
-            <button id="close-sidebar-btn" class="p-2 hover:bg-gray-100 rounded-lg">
->>>>>>> bad5a6d2f50a71399ba846f9bf17de84899a799b
+            <button id="sidebar-close-mobile" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button id="sidebar-close-desktop" class="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -100,8 +95,7 @@
           </div>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto"
-          onclick="if(window.innerWidth < 768) window.closeMobileMenu()">
+        <nav id="sidebar-nav" class="flex-1 p-4 space-y-1 overflow-y-auto">
           <button
             class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="overview">
@@ -161,20 +155,15 @@
         </div>
       </aside>
 
-      <main class="dashboard-wrapper flex-1 min-w-0 p-4 sm:p-8 w-full h-screen overflow-y-auto">
+      <main id="main-content" class="dashboard-wrapper flex-1 min-w-0 p-4 sm:p-8 w-full h-screen overflow-y-auto">
 
         <div
           class="flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
           <div class="flex items-center gap-2">
-            <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-8 w-auto">
+            <img src="/images/logo-maroon.png" alt="Scholaco Logo" class="h-8 w-auto">
           </div>
-<<<<<<< HEAD
-          <button onclick="window.toggleMobileMenu()"
+          <button id="hamburger-menu"
             class="text-gray-600 hover:text-maroon-800 bg-gray-50 rounded-lg p-2 focus:outline-none transition-colors">
-=======
-          <button id="sidebar-open-btn"
-            class="text-gray-600 hover:text-maroon-800 bg-gray-50 rounded-lg p-2 focus:outline-none transition-colors hidden">
->>>>>>> bad5a6d2f50a71399ba846f9bf17de84899a799b
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -348,76 +337,7 @@
   <div id="toast-container" class="fixed top-4 right-4 sm:bottom-6 sm:right-6 sm:top-auto z-50 flex flex-col gap-2">
   </div>
 
-<<<<<<< HEAD
-=======
-  <script>
-    // This executes immediately upon the script block being parsed by the browser
-    const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
-    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-    const sidebar = document.getElementById('app-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const sidebarLinks = document.querySelectorAll('.sidebar-item');
-    const sections = document.querySelectorAll('.dashboard-view');
 
-    function setSidebarOpen(open) {
-      if (!sidebar) return;
-      if (open) {
-        sidebar.classList.remove('sidebar-collapsed');
-        sidebar.classList.remove('-translate-x-full');
-        if (overlay && window.innerWidth < 768) overlay.classList.remove('hidden');
-        if (sidebarOpenBtn) sidebarOpenBtn.classList.add('hidden');
-      } else {
-        sidebar.classList.add('sidebar-collapsed');
-        if (window.innerWidth < 768) {
-          sidebar.classList.add('-translate-x-full');
-          if (overlay) overlay.classList.add('hidden');
-        }
-        if (sidebarOpenBtn) sidebarOpenBtn.classList.remove('hidden');
-      }
-    }
-
-    function openSidebar() {
-      setSidebarOpen(true);
-    }
-
-    function closeSidebar() {
-      setSidebarOpen(false);
-    }
-
-    function showView(viewId) {
-      if (!sections.length) return;
-      sections.forEach(section => section.classList.add('hidden'));
-      const target = document.getElementById(`dashboard-${viewId}`);
-      if (target) target.classList.remove('hidden');
-      sidebarLinks.forEach(link => {
-        link.classList.toggle('active', link.dataset.view === viewId);
-      });
-      closeSidebar();
-    }
-
-    if (sidebarOpenBtn) sidebarOpenBtn.addEventListener('click', openSidebar);
-    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-    if (overlay) overlay.addEventListener('click', closeSidebar);
-
-    sidebarLinks.forEach(link => {
-      const viewName = link.dataset.view;
-      if (!viewName) return;
-      link.addEventListener('click', () => {
-        showView(viewName);
-      });
-    });
-
-    window.addEventListener('resize', () => {
-      if (window.innerWidth >= 768) {
-        if (overlay) overlay.classList.add('hidden');
-      }
-    });
-
-    // initialize sidebar state
-    setSidebarOpen(true);
-  </script>
-
->>>>>>> bad5a6d2f50a71399ba846f9bf17de84899a799b
   <script type="module" src="/src/js/app.js"></script>
 
 </body>
