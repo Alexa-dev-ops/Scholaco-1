@@ -119,13 +119,11 @@ export function toggleSidebar() {
   if (sidebarOpen) {
     sidebar.classList.remove('sidebar-collapsed');
     sidebar.classList.remove('-translate-x-full');
-    if (main) main.style.marginLeft = window.innerWidth >= 768 ? '16rem' : '0';
     if (window.innerWidth < 768) {
       overlay.classList.remove('hidden');
     }
   } else {
     sidebar.classList.add('sidebar-collapsed');
-    if (main) main.style.marginLeft = '0';
     if (window.innerWidth < 768) {
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
@@ -553,7 +551,7 @@ export async function handleLogin(e) {
   } else {
     setWelcomeTrigger();
     showToast('Welcome back!');
-    window.location.href = 'dashboard.html';
+   window.location.href = 'dashboard.html';
   }
 }
 
@@ -732,13 +730,6 @@ function handleFilterChange(e) {
   if (globalSignOutBtn) globalSignOutBtn.addEventListener('click', signOutUser);
 
   await initApp();
-  
-  // Initialize sidebar state
-  const main = document.getElementById('main-content');
-  if (main && window.innerWidth >= 768) {
-    main.style.marginLeft = '16rem';
-    sidebarOpen = true;
-  }
   
   // Only set dashboard view if we are actually on the dashboard HTML page
   if (document.getElementById('dashboard-overview')) {
