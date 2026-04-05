@@ -69,7 +69,7 @@
      <p id="hero-tagline" class="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg">Your scholarship journey, organized. Never miss a deadline, track every application, and maximize your chances of funding your dreams.</p>
      <div class="flex flex-col sm:flex-row gap-4 mb-12"><a id="cta-button" href="signup.html" class="btn-primary px-6 sm:px-8 py-3 sm:py-4 rounded-full text-white font-semibold text-base sm:text-lg flex items-center justify-center gap-2 group"> <span>Get Started Free</span>
        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-       </svg></a> <button class="px-6 sm:px-8 py-3 sm:py-4 rounded-full border-2 border-maroon-200 text-maroon-800 font-semibold hover:bg-maroon-50 transition-colors flex items-center justify-center gap-2">
+       </svg></a> <button id="demo-btn" class="px-6 sm:px-8 py-3 sm:py-4 rounded-full border-2 border-maroon-200 text-maroon-800 font-semibold hover:bg-maroon-50 transition-colors flex items-center justify-center gap-2">
        <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24"><path d="M8 5v14l11-7z" />
        </svg><span>Watch Demo</span> </button>
      </div>
@@ -322,12 +322,295 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6">
    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
     <div class="flex items-baseline gap-0"><img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto"></div>
-    <div class="flex gap-6 sm:gap-8 text-xs sm:text-sm"><a href="#" class="hover:text-white transition-colors">Privacy</a> <a href="#" class="hover:text-white transition-colors">Terms</a> <a href="#" class="hover:text-white transition-colors">Contact</a>
+    <div class="flex gap-6 sm:gap-8 text-xs sm:text-sm">
+      <button id="footer-privacy" class="hover:text-white transition-colors">Privacy</button>
+      <button id="footer-terms" class="hover:text-white transition-colors">Terms</button>
+      <button id="footer-contacts" class="hover:text-white transition-colors">Contact</button>
     </div>
     <div class="text-xs sm:text-sm">© 2026 Scholaco. All rights reserved.</div>
    </div>
   </div>
  </footer>
+
+ <!-- Contact Form Modal -->
+ <div id="modal-contact" class="fixed inset-0 z-50 hidden">
+   <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
+   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+     <div class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
+       <div class="flex items-center justify-between mb-6">
+         <h2 class="font-display text-2xl font-bold">Contact Us</h2>
+         <button type="button" data-modal-close="contact" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
+           <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg>
+         </button>
+       </div>
+       <form id="contact-form" class="space-y-5">
+         <div>
+           <label for="contact-name" class="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+           <input type="text" id="contact-name" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all" placeholder="Your full name" required>
+         </div>
+         <div>
+           <label for="contact-email" class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+           <input type="email" id="contact-email" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all" placeholder="your.email@example.com" required>
+         </div>
+         <div>
+           <label for="contact-message" class="block text-sm font-medium text-gray-700 mb-2">Message *</label>
+           <textarea id="contact-message" rows="5" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none" placeholder="How can we help you?" required></textarea>
+         </div>
+         <div class="flex flex-col sm:flex-row gap-4 pt-4">
+           <button type="button" data-modal-close="contact" class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+           <button type="submit" id="send-contact-btn" class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Send Message</button>
+         </div>
+       </form>
+     </div>
+   </div>
+ </div>
+
+ <!-- Privacy Policy Modal -->
+ <div id="modal-privacy" class="fixed inset-0 z-50 hidden">
+   <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
+   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+     <div class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-4xl shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
+       <div class="flex items-center justify-between mb-6">
+         <h2 class="font-display text-2xl font-bold">Privacy Policy</h2>
+         <button type="button" data-modal-close="privacy" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
+           <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg>
+         </button>
+       </div>
+       <div class="prose prose-sm max-w-none text-gray-700">
+         <h3 class="text-lg font-semibold mb-4">Privacy Policy Draft</h3>
+         <p class="mb-4">This Privacy Policy describes how Scholaco ("we," "us," or "our") collects, uses, and protects your personal information when you use our scholarship management platform.</p>
+         
+         <h4 class="font-semibold mb-2">Information We Collect</h4>
+         <p class="mb-4">We collect information you provide directly to us, such as when you create an account, add scholarship applications, or contact us for support.</p>
+         
+         <h4 class="font-semibold mb-2">How We Use Your Information</h4>
+         <p class="mb-4">We use the information to provide, maintain, and improve our services, communicate with you, and ensure the security of our platform.</p>
+         
+         <h4 class="font-semibold mb-2">Information Sharing</h4>
+         <p class="mb-4">We do not sell, trade, or otherwise transfer your personal information to third parties without your consent, except as described in this policy.</p>
+         
+         <h4 class="font-semibold mb-2">Data Security</h4>
+         <p class="mb-4">We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+         
+         <h4 class="font-semibold mb-2">Contact Us</h4>
+         <p class="mb-4">If you have any questions about this Privacy Policy, please contact us through the contact form.</p>
+         
+         <p class="text-sm text-gray-500 mt-6">* This is a draft privacy policy. Please consult with legal counsel for a complete and legally binding version.</p>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- Demo Modal -->
+ <div id="modal-demo" class="fixed inset-0 z-50 hidden">
+   <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
+   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+     <div class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-4xl shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
+       <div class="flex items-center justify-between mb-6">
+         <h2 class="font-display text-2xl font-bold">Scholaco Demo</h2>
+         <button type="button" data-modal-close="demo" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
+           <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg>
+         </button>
+       </div>
+       <div class="grid gap-6">
+         <div class="grid md:grid-cols-2 gap-4">
+           <div class="bg-slate-950 rounded-3xl p-5 text-white">
+             <div class="flex items-center justify-between mb-4">
+               <div>
+                 <div class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-2">Dashboard Preview</div>
+                 <div class="text-xl font-semibold">Core workflows in action</div>
+               </div>
+               <span class="inline-flex items-center gap-2 rounded-full bg-maroon-700 px-3 py-1 text-xs font-semibold text-white">Live feature steps</span>
+             </div>
+             <div class="grid gap-4">
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Add Application</div>
+                 <div class="text-slate-500 text-sm mt-2">Fill in scholarship name, deadline, amount, and status.</div>
+                 <div class="mt-4 rounded-3xl bg-slate-800 p-4 text-slate-200">
+                   <div class="text-sm text-slate-400">Application Details</div>
+                   <div class="mt-2 text-white font-semibold">Gates Scholarship</div>
+                   <div class="text-slate-400 text-sm">Deadline: May 10 • Amount: $10,000</div>
+                   <div class="mt-3 inline-flex items-center gap-2 rounded-full bg-green-500/15 px-3 py-2 text-green-200 text-sm">✔ Your application has been added successfully</div>
+                 </div>
+               </div>
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Set Reminder</div>
+                 <div class="text-slate-500 text-sm mt-2">Schedule deadline alerts so you never miss a submission.</div>
+                 <div class="mt-4 rounded-3xl bg-slate-800 p-4 text-slate-200">
+                   <div class="text-sm text-slate-400">Reminder set for</div>
+                   <div class="mt-2 text-white font-semibold">May 5, 2026 at 10:00 AM</div>
+                 </div>
+               </div>
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Email & Calendar Integration</div>
+                 <div class="text-slate-500 text-sm mt-2">Link your inbox and calendar for seamless scholarship tracking.</div>
+                 <div class="mt-4 grid gap-3">
+                   <div class="rounded-3xl bg-slate-800 p-4 text-slate-200">
+                     <div class="text-sm text-slate-400">Email status</div>
+                     <div class="mt-2 text-white font-semibold">Connected</div>
+                   </div>
+                   <div class="rounded-3xl bg-slate-800 p-4 text-slate-200">
+                     <div class="text-sm text-slate-400">Calendar events</div>
+                     <div class="mt-2 text-white font-semibold">5 upcoming deadlines</div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+           <div class="bg-slate-950 rounded-3xl p-5 text-white">
+             <div class="text-xs uppercase tracking-[0.3em] text-slate-400 mb-4">Interactive dashboard view</div>
+             <div class="grid gap-4">
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Sidebar navigation</div>
+                 <div class="text-slate-500 text-sm mt-2">Switch quickly between sections: Dashboard, Applications, Calendar, Email Integration, Reminders.</div>
+               </div>
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Statistics</div>
+                 <div class="text-slate-500 text-sm mt-2">Track totals, progress, awaiting responses, and award potential.</div>
+               </div>
+               <div class="bg-slate-900 rounded-3xl p-4 border border-slate-800">
+                 <div class="font-semibold">Quick actions</div>
+                 <div class="text-slate-500 text-sm mt-2">Add applications, set reminders, and manage email sync from a single page.</div>
+               </div>
+             </div>
+           </div>
+         </div>
+         <div class="bg-white rounded-3xl p-5">
+           <h3 class="font-semibold text-lg mb-4">What the demo shows</h3>
+           <ul class="space-y-4 text-gray-700">
+             <li class="rounded-3xl border border-gray-200 p-4">
+               <div class="font-semibold mb-1">1. Add Application</div>
+               <div class="text-sm text-gray-600">Enter scholarship details and submit. The dashboard confirms success instantly.</div>
+             </li>
+             <li class="rounded-3xl border border-gray-200 p-4">
+               <div class="font-semibold mb-1">2. Set Reminder</div>
+               <div class="text-sm text-gray-600">Choose a deadline reminder and keep your application on schedule.</div>
+             </li>
+             <li class="rounded-3xl border border-gray-200 p-4">
+               <div class="font-semibold mb-1">3. Email Integration</div>
+               <div class="text-sm text-gray-600">Connect email to automatically track scholarship responses and replies.</div>
+             </li>
+             <li class="rounded-3xl border border-gray-200 p-4">
+               <div class="font-semibold mb-1">4. Calendar view</div>
+               <div class="text-sm text-gray-600">See upcoming deadlines and reminders in one place.</div>
+             </li>
+           </ul>
+         </div>
+       </div>
+       <div class="mt-6 flex gap-4">
+         <button type="button" data-modal-close="demo" class="w-full px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Close</button>
+         <a href="signup.html" class="w-full btn-primary px-6 py-3 rounded-xl text-white font-semibold text-center">Get Started Free</a>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <!-- Terms Modal -->
+ <div id="modal-terms" class="fixed inset-0 z-50 hidden">
+   <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
+   <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+     <div class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-4xl shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
+       <div class="flex items-center justify-between mb-6">
+         <h2 class="font-display text-2xl font-bold">Terms of Service</h2>
+         <button type="button" data-modal-close="terms" class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
+           <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg>
+         </button>
+       </div>
+       <div class="prose prose-sm max-w-none text-gray-700">
+         <h3 class="text-lg font-semibold mb-4">Terms of Service Draft</h3>
+         
+         <h4 class="font-semibold mb-2">1. Acceptance of Terms</h4>
+         <p class="mb-4">By accessing and using the Scholaco platform, you accept and agree to be bound by the terms and provision of this agreement.</p>
+         
+         <h4 class="font-semibold mb-2">2. Use License</h4>
+         <p class="mb-4">Permission is granted to temporarily download one copy of the materials (information or software) on Scholaco's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:</p>
+         <ul class="list-disc list-inside mb-4 ml-4">
+           <li>Modify or copy the materials</li>
+           <li>Use the materials for any commercial purpose or for any public display</li>
+           <li>Attempt to decompile or reverse engineer any software contained on the website</li>
+           <li>Remove any copyright or other proprietary notations from the materials</li>
+           <li>Transfer the materials to another person or "mirror" the materials on any other server</li>
+         </ul>
+         
+         <h4 class="font-semibold mb-2">3. Disclaimer</h4>
+         <p class="mb-4">The materials on Scholaco's website are provided on an 'as is' basis. Scholaco makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.</p>
+         
+         <h4 class="font-semibold mb-2">4. Limitations</h4>
+         <p class="mb-4">In no event shall Scholaco or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Scholaco's website.</p>
+         
+         <h4 class="font-semibold mb-2">5. Accuracy of Materials</h4>
+         <p class="mb-4">The materials appearing on Scholaco's website could include technical, typographical, or photographic errors. Scholaco does not warrant that any of the materials on its website are accurate, complete, or current.</p>
+         
+         <h4 class="font-semibold mb-2">6. Modifications</h4>
+         <p class="mb-4">Scholaco may revise these terms of service for its website at any time without notice. By using this website, you are agreeing to be bound by the then current version of these terms of service.</p>
+         
+         <p class="text-sm text-gray-500 mt-6">* This is a draft terms of service. Please consult with legal counsel for a complete and legally binding version.</p>
+       </div>
+     </div>
+   </div>
+ </div>
+
+ <script>
+   // Modal functionality
+   function openModal(modalId) {
+     const modal = document.getElementById(`modal-${modalId}`);
+     if (modal) {
+       modal.classList.remove('hidden');
+       document.body.style.overflow = 'hidden';
+     }
+   }
+
+   function closeModal(modalId) {
+     const modal = document.getElementById(`modal-${modalId}`);
+     if (modal) {
+       modal.classList.add('hidden');
+       document.body.style.overflow = 'auto';
+     }
+   }
+
+   // Button event listeners
+   document.getElementById('demo-btn').addEventListener('click', () => openModal('demo'));
+   document.getElementById('footer-contacts').addEventListener('click', () => openModal('contact'));
+   document.getElementById('footer-privacy').addEventListener('click', () => openModal('privacy'));
+   document.getElementById('footer-terms').addEventListener('click', () => openModal('terms'));
+
+   // Modal close button event listeners
+   document.querySelectorAll('[data-modal-close]').forEach(btn => {
+     btn.addEventListener('click', (e) => {
+       const modalId = e.target.getAttribute('data-modal-close');
+       closeModal(modalId);
+     });
+   });
+
+   // Close modal when clicking backdrop
+   document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+     backdrop.addEventListener('click', (e) => {
+       const modal = e.target.closest('[id^="modal-"]');
+       if (modal) {
+         const modalId = modal.id.replace('modal-', '');
+         closeModal(modalId);
+       }
+     });
+   });
+
+   // Contact form submission
+   document.getElementById('contact-form').addEventListener('submit', (e) => {
+     e.preventDefault();
+     // Here you would typically send the form data to your server
+     alert('Thank you for your message! We will get back to you soon.');
+     closeModal('contact');
+     // Reset form
+     e.target.reset();
+   });
+ </script>
 
 </body>
 </html>
