@@ -17,17 +17,9 @@
         extend: {
           colors: {
             maroon: {
-              50: '#fdf2f4',
-              100: '#fce7eb',
-              200: '#f9d0d9',
-              300: '#f4a9ba',
-              400: '#ec7a94',
-              500: '#df4d6f',
-              600: '#cb2d55',
-              700: '#a91e43',
-              800: '#800020',
-              900: '#6b1a35',
-              950: '#3d0a1a'
+              50: '#fdf2f4', 100: '#fce7eb', 200: '#f9d0d9', 300: '#f4a9ba',
+              400: '#ec7a94', 500: '#df4d6f', 600: '#cb2d55', 700: '#a91e43',
+              800: '#800020', 900: '#6b1a35', 950: '#3d0a1a'
             }
           }
         }
@@ -39,7 +31,28 @@
     body {
       box-sizing: border-box;
     }
+
+    /* Forces scrollbars on mobile to be neat */
+    .mobile-scroll {
+      -webkit-overflow-scrolling: touch;
+    }
   </style>
+
+  <script>
+    window.toggleMobileMenu = function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    };
+
+    window.closeMobileMenu = function () {
+      const sidebar = document.getElementById('app-sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    };
+  </script>
 </head>
 
 <body class="h-full font-body bg-white text-gray-800 overflow-auto">
@@ -47,18 +60,17 @@
   <div id="dashboard-page">
     <div class="min-h-screen bg-gray-50 flex overflow-hidden">
 
-      <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity"></div>
+      <div id="sidebar-overlay" onclick="window.closeMobileMenu()"
+        class="fixed inset-0 bg-black/50 z-40 hidden md:hidden transition-opacity cursor-pointer"></div>
 
       <aside id="app-sidebar"
         class="sidebar w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50 shadow-2xl md:shadow-none h-full">
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="flex items-baseline gap-0">
-                <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto">
-              </div>
+              <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto">
             </div>
-            <button id="close-sidebar-btn" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+            <button onclick="window.closeMobileMenu()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -66,7 +78,8 @@
           </div>
         </div>
 
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto"
+          onclick="if(window.innerWidth < 768) window.closeMobileMenu()">
           <button
             class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="overview">
@@ -76,7 +89,6 @@
             </svg>
             <span class="font-medium">Dashboard</span>
           </button>
-
           <button
             class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="applications">
@@ -86,7 +98,6 @@
             </svg>
             <span class="font-medium">Applications</span>
           </button>
-
           <button
             class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="calendar">
@@ -96,7 +107,6 @@
             </svg>
             <span class="font-medium">Calendar</span>
           </button>
-
           <button
             class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="email">
@@ -106,7 +116,6 @@
             </svg>
             <span class="font-medium">Email Integration</span>
           </button>
-
           <button
             class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-gray-700 hover:bg-maroon-50 hover:text-maroon-700 transition-colors"
             data-view="reminders">
@@ -130,14 +139,14 @@
         </div>
       </aside>
 
-      <main class="dashboard-wrapper flex-1 p-4 sm:p-8 w-full h-screen overflow-y-auto">
+      <main class="dashboard-wrapper flex-1 min-w-0 p-4 sm:p-8 w-full h-screen overflow-y-auto">
 
         <div
           class="md:hidden flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
           <div class="flex items-center gap-2">
             <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-8 w-auto">
           </div>
-          <button id="mobile-menu-btn"
+          <button onclick="window.toggleMobileMenu()"
             class="text-gray-600 hover:text-maroon-800 bg-gray-50 rounded-lg p-2 focus:outline-none transition-colors">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -171,7 +180,6 @@
 
         <div id="dashboard-overview" class="dashboard-view block animate-fade-in-up">
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-
             <div class="glass-card rounded-2xl p-6 card-hover">
               <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 bg-maroon-100 rounded-xl flex items-center justify-center">
@@ -180,13 +188,10 @@
                       d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <span class="text-xs text-green-600 font-semibold bg-green-100 px-2 py-1 rounded-full">+3 this
-                  week</span>
               </div>
               <div id="stat-total" class="text-3xl font-bold text-gray-800">0</div>
               <div class="text-gray-500 text-sm">Total Applications</div>
             </div>
-
             <div class="glass-card rounded-2xl p-6 card-hover">
               <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
@@ -199,7 +204,6 @@
               <div id="stat-progress" class="text-3xl font-bold text-gray-800">0</div>
               <div class="text-gray-500 text-sm">In Progress</div>
             </div>
-
             <div class="glass-card rounded-2xl p-6 card-hover">
               <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -212,7 +216,6 @@
               <div id="stat-awaiting" class="text-3xl font-bold text-gray-800">0</div>
               <div class="text-gray-500 text-sm">Awaiting Response</div>
             </div>
-
             <div class="glass-card rounded-2xl p-6 card-hover">
               <div class="flex items-center justify-between mb-4">
                 <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
@@ -225,7 +228,6 @@
               <div id="stat-potential" class="text-3xl font-bold text-gray-800">$0</div>
               <div class="text-gray-500 text-sm">Potential Awards</div>
             </div>
-
           </div>
 
           <div class="glass-card rounded-2xl p-6">
@@ -234,14 +236,9 @@
               <button type="button" class="text-maroon-600 hover:text-maroon-800 font-medium text-sm"
                 data-view="applications">View All →</button>
             </div>
-            <div id="recent-applications" class="space-y-4">
+            <div id="recent-applications" class="space-y-4 overflow-x-auto mobile-scroll pb-2 w-full">
               <div class="text-center py-12 text-gray-400">
-                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
                 <p class="text-lg font-medium">No applications yet</p>
-                <p class="text-sm">Click "Add Application" to get started!</p>
               </div>
             </div>
           </div>
@@ -259,23 +256,14 @@
                 <option value="awaiting">Awaiting Response</option>
               </select>
             </div>
-            <div id="all-applications" class="space-y-4"></div>
+            <div id="all-applications" class="space-y-4 overflow-x-auto mobile-scroll pb-4 w-full"></div>
           </div>
         </div>
 
         <div id="dashboard-calendar" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <h2 class="font-display text-xl font-bold mb-6">Upcoming Deadlines</h2>
-            <div id="calendar-deadlines" class="space-y-4">
-              <div class="text-center py-12 text-gray-400">
-                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p class="text-lg font-medium">No deadlines set</p>
-                <p class="text-sm">Add applications with deadlines to see them here</p>
-              </div>
-            </div>
+            <div id="calendar-deadlines" class="space-y-4 overflow-x-auto mobile-scroll pb-2 w-full"></div>
           </div>
         </div>
 
@@ -285,73 +273,11 @@
             <p class="text-gray-600 mb-8">Connect your email to automatically track scholarship responses and updates.
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-              <div
-                class="border-2 border-dashed border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-maroon-300 transition-colors cursor-pointer group">
-                <div
-                  class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <svg class="w-10 h-10" viewBox="0 0 24 24">
-                    <path fill="#EA4335"
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                    <path fill="#34A853"
-                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                    <path fill="#FBBC05"
-                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                    <path fill="#EA4335"
-                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                  </svg>
-                </div>
+              <div class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center hover:border-maroon-300">
                 <h3 class="font-semibold text-lg mb-2">Connect Gmail</h3>
-                <p class="text-gray-500 text-sm">Automatically scan for scholarship emails</p>
                 <button onclick="window.connectGmail()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
+                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium w-full sm:w-auto">Connect</button>
               </div>
-
-              <div
-                class="border-2 border-dashed border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-maroon-300 transition-colors cursor-pointer group">
-                <div
-                  class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <svg class="w-10 h-10" viewBox="0 0 24 24" fill="#0078D4">
-                    <path
-                      d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6zm-2 0l-8 5-8-5h16zm0 12H4V8l8 5 8-5v10z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Connect Outlook</h3>
-                <p class="text-gray-500 text-sm">Sync your Microsoft email account</p>
-                <button onclick="window.connectOutlook()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
-              </div>
-
-              <div
-                class="border-2 border-dashed border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-maroon-300 transition-colors cursor-pointer group">
-                <div
-                  class="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Connect Yahoo Mail</h3>
-                <p class="text-gray-500 text-sm">Link your Yahoo email account</p>
-                <button onclick="window.connectYahoo()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Connect</button>
-              </div>
-
-              <div
-                class="border-2 border-dashed border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-maroon-300 transition-colors cursor-pointer group">
-                <div
-                  class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                </div>
-                <h3 class="font-semibold text-lg mb-2">Other Email</h3>
-                <p class="text-gray-500 text-sm">Connect via IMAP/SMTP</p>
-                <button onclick="window.configureOtherEmail()"
-                  class="mt-4 px-6 py-2 bg-maroon-600 text-white rounded-full text-sm font-medium hover:bg-maroon-700 transition-colors w-full sm:w-auto">Configure</button>
-              </div>
-
             </div>
           </div>
         </div>
@@ -359,16 +285,7 @@
         <div id="dashboard-reminders" class="dashboard-view hidden animate-fade-in-up">
           <div class="glass-card rounded-2xl p-6">
             <h2 class="font-display text-xl font-bold mb-6">Reminders</h2>
-            <div id="reminders-list" class="space-y-4">
-              <div class="text-center py-12 text-gray-400">
-                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <p class="text-lg font-medium">No reminders set</p>
-                <p class="text-sm">Add reminders to your applications to stay on track</p>
-              </div>
-            </div>
+            <div id="reminders-list" class="space-y-4 overflow-x-auto mobile-scroll pb-2 w-full"></div>
           </div>
         </div>
 
@@ -384,61 +301,14 @@
         <div class="flex items-center justify-between mb-6">
           <h2 class="font-display text-2xl font-bold">Add New Application</h2>
           <button type="button" data-modal-close="add-application"
-            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">✕</button>
         </div>
         <form id="add-application-form" class="space-y-5">
-          <div>
-            <label for="app-name" class="block text-sm font-medium text-gray-700 mb-2">Scholarship Name *</label>
-            <input type="text" id="app-name"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
-              placeholder="e.g., Gates Scholarship" required>
-          </div>
-          <div>
-            <label for="app-org" class="block text-sm font-medium text-gray-700 mb-2">Organization</label>
-            <input type="text" id="app-org"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
-              placeholder="e.g., Bill &amp; Melinda Gates Foundation">
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
-              <input type="text" id="app-amount"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
-                placeholder="e.g., $10,000">
-            </div>
-            <div>
-              <label for="app-deadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
-              <input type="date" id="app-deadline"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-            </div>
-          </div>
-          <div>
-            <label for="app-status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select id="app-status"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-              <option value="not_started">Not Started</option>
-              <option value="in_progress">In Progress</option>
-              <option value="awaiting">Completed / Awaiting Response</option>
-            </select>
-          </div>
-          <div>
-            <label for="app-reminder" class="block text-sm font-medium text-gray-700 mb-2">Set Reminder</label>
-            <input type="datetime-local" id="app-reminder"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-          </div>
-          <div>
-            <label for="app-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-            <textarea id="app-notes" rows="3"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none"
-              placeholder="Any additional notes..."></textarea>
-          </div>
+          <input type="text" id="app-name" class="w-full px-4 py-3 rounded-xl border border-gray-200"
+            placeholder="Scholarship Name *" required>
           <div class="flex flex-col sm:flex-row gap-4 pt-4">
             <button type="button" data-modal-close="add-application"
-              class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
+              class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 font-semibold">Cancel</button>
             <button type="submit" id="add-app-btn"
               class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Add
               Application</button>
@@ -448,113 +318,8 @@
     </div>
   </div>
 
-  <div id="modal-edit-application" class="fixed inset-0 z-50 hidden">
-    <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
-    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-      <div
-        class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="font-display text-2xl font-bold">Edit Application</h2>
-          <button type="button" data-modal-close="edit-application"
-            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <form id="edit-application-form" class="space-y-5">
-          <input type="hidden" id="edit-app-id">
-          <div>
-            <label for="edit-app-name" class="block text-sm font-medium text-gray-700 mb-2">Scholarship Name *</label>
-            <input type="text" id="edit-app-name"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
-              required>
-          </div>
-          <div>
-            <label for="edit-app-org" class="block text-sm font-medium text-gray-700 mb-2">Organization</label>
-            <input type="text" id="edit-app-org"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="edit-app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
-              <input type="text" id="edit-app-amount"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-            </div>
-            <div>
-              <label for="edit-app-deadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
-              <input type="date" id="edit-app-deadline"
-                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-            </div>
-          </div>
-          <div>
-            <label for="edit-app-status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <select id="edit-app-status"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-              <option value="not_started">Not Started</option>
-              <option value="in_progress">In Progress</option>
-              <option value="awaiting">Completed / Awaiting Response</option>
-            </select>
-          </div>
-          <div>
-            <label for="edit-app-reminder" class="block text-sm font-medium text-gray-700 mb-2">Set Reminder</label>
-            <input type="datetime-local" id="edit-app-reminder"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
-          </div>
-          <div>
-            <label for="edit-app-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-            <textarea id="edit-app-notes" rows="3"
-              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none"></textarea>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-4 pt-4">
-            <button type="button" data-modal-close="edit-application"
-              class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors">Cancel</button>
-            <button type="submit" id="edit-app-btn"
-              class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Save Changes</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
   <div id="toast-container" class="fixed top-4 right-4 sm:bottom-6 sm:right-6 sm:top-auto z-50 flex flex-col gap-2">
   </div>
-
-  <script>
-    // This executes immediately upon the script block being parsed by the browser
-    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    const closeSidebarBtn = document.getElementById('close-sidebar-btn');
-    const sidebar = document.getElementById('app-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const sidebarLinks = document.querySelectorAll('.sidebar-item');
-
-    function openSidebar() {
-      if (sidebar && overlay) {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-      }
-    }
-
-    function closeSidebar() {
-      if (sidebar && overlay) {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-      }
-    }
-
-    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', openSidebar);
-    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
-    if (overlay) overlay.addEventListener('click', closeSidebar);
-
-    // Auto-close sidebar on mobile when a link is clicked
-    sidebarLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        if (window.innerWidth < 768) {
-          closeSidebar();
-        }
-      });
-    });
-  </script>
 
   <script type="module" src="/src/js/app.js"></script>
 
