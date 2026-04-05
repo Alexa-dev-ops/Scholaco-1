@@ -11,7 +11,8 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         dashboard: resolve(__dirname, 'dashboard.html'),
         contacts: resolve(__dirname, 'contacts.html'),
-        privacy: resolve(__dirname, 'privacy.html')
+        privacy: resolve(__dirname, 'privacy.html'),
+        terms: resolve(__dirname, 'terms.html')
       }
     }
   }
