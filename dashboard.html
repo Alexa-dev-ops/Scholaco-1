@@ -64,6 +64,32 @@
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
     };
+
+    window.handleHamburger = function() {
+      if (window.innerWidth < 768) {
+        window.toggleMobileMenu();
+      } else {
+        window.toggleDesktopSidebar();
+      }
+    };
+
+    window.toggleDesktopSidebar = function() {
+      const sidebar = document.getElementById('app-sidebar');
+      const isOpen = !sidebar.classList.contains('md:-translate-x-full');
+      if (isOpen) {
+        sidebar.classList.remove('md:translate-x-0');
+        sidebar.classList.add('md:-translate-x-full');
+      } else {
+        sidebar.classList.remove('md:-translate-x-full');
+        sidebar.classList.add('md:translate-x-0');
+      }
+    };
+
+    window.closeDesktopSidebar = function() {
+      const sidebar = document.getElementById('app-sidebar');
+      sidebar.classList.remove('md:translate-x-0');
+      sidebar.classList.add('md:-translate-x-full');
+    };
   </script>
 </head>
 
@@ -80,14 +106,14 @@
         <div class="p-6 border-b border-gray-100">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <img src="images/logo-maroon.png" alt="Scholaco Logo" class="h-10 w-auto">
+              <img src="images/scholaco_logo_transparent.png" alt="Scholaco Logo" class="h-10 w-auto">
             </div>
-            <button id="sidebar-close-desktop" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+            <button id="sidebar-close-mobile" onclick="window.closeMobileMenu()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <button id="sidebar-close-desktop" class="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
+            <button id="sidebar-close-desktop" onclick="window.closeDesktopSidebar()" class="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -160,9 +186,9 @@
         <div
           class="flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
           <div class="flex items-center gap-2">
-            <img src="/images/logo-maroon.png" alt="Scholaco Logo" class="h-8 w-auto">
+            <img src="/images/scholaco_logo_transparent.png" alt="Scholaco Logo" class="h-8 w-auto">
           </div>
-          <button id="hamburger-menu"
+          <button id="hamburger-menu" onclick="window.handleHamburger()"
             class="text-gray-600 hover:text-maroon-800 bg-gray-50 rounded-lg p-2 focus:outline-none transition-colors">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
