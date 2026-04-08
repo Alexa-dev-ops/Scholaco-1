@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 import { verifyToken } from './auth.js';
 import { sendWelcomeEmail, sendApplicationSubmittedEmail } from './emailService.js';
 import { startScheduler } from './scheduler.js';
@@ -20,6 +21,7 @@ app.use(cors({
   origin: [
     'http://localhost:5173',
     'https://scholaco.vercel.app',
+    'https://scholaco-five.vercel.app'
   ],
   credentials: true,
 }));
@@ -29,8 +31,40 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// --- Contact Form Route ---
+app.post('/api/contact', async (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ success: false, message: 'Name, email, and message are required' });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to: 'scholaco1@gmail.com',    
+      replyTo: email,               
+      subject: `New Scholaco Contact from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: "Message sent successfully!" });
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({ success: false, message: "Failed to send message." });
+  }
+});
+
 // --- Welcome email ---
-// Called by frontend immediately after successful signup
 app.post('/emails/welcome', verifyToken, async (req, res) => {
   const { email, full_name } = req.body;
 
@@ -48,8 +82,6 @@ app.post('/emails/welcome', verifyToken, async (req, res) => {
 });
 
 // --- Application submitted email ---
-// Called when user marks an application status as 'awaiting'
-// Email is pulled from the verified JWT — never trusted from the request body
 app.post('/emails/application-submitted', verifyToken, async (req, res) => {
   const { app_name } = req.body;
   const userEmail = req.user.email;
