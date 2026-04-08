@@ -12,7 +12,7 @@ let applications = [];
 let currentEditApp = null;
 let sidebarOpen = false;
 let currentUser = null;
-let welcomeDismissed = false; // dismissed on first interaction, not on a timer
+let welcomeDismissed = false; 
 const WELCOME_TRIGGER_KEY = 'scholaco_welcome_trigger';
 const WELCOME_SEEN_KEY = 'scholaco_welcome_seen';
 
@@ -43,7 +43,7 @@ export async function initApp() {
   });
 }
 
-// Read full_name from auth metadata instantly — no waiting on DB query
+// Read full_name from auth metadata instantly
 async function updateWelcomeMessage() {
   if (!currentUser) return;
 
@@ -51,18 +51,15 @@ async function updateWelcomeMessage() {
   const nameSpan = document.getElementById('user-first-name');
   if (!nameSpan) return;
 
-  // Hide header until name is ready — prevents flash of empty content
   if (welcomeHeader) welcomeHeader.style.visibility = 'hidden';
 
   let firstName = null;
 
-  // Auth metadata is instant — populated at signUp, no network call needed
   const metaName = currentUser.user_metadata?.full_name;
   if (metaName) {
     firstName = metaName.split(' ')[0];
   }
 
-  // Fallback to profiles table only if metadata is missing
   if (!firstName) {
     try {
       const { data: profile } = await supabase
@@ -73,16 +70,13 @@ async function updateWelcomeMessage() {
       if (profile?.full_name) {
         firstName = profile.full_name.split(' ')[0];
       }
-    } catch (e) {
-      // profiles table may not exist — that's fine
-    }
+    } catch (e) {}
   }
 
   if (firstName) {
     nameSpan.textContent = firstName;
   }
 
-  // Reveal header only once name is set
   if (welcomeHeader) welcomeHeader.style.visibility = 'visible';
 }
 
@@ -101,14 +95,12 @@ async function loadApplications() {
   updateStats();
 }
 
-// Page navigation
 export function showPage(pageId) {
   document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
   const el = document.getElementById(pageId);
   if (el) el.classList.add('active');
 }
 
-// Sidebar functions
 export function toggleSidebar() {
   sidebarOpen = !sidebarOpen;
   const sidebar = document.getElementById('app-sidebar');
@@ -119,11 +111,13 @@ export function toggleSidebar() {
   if (sidebarOpen) {
     sidebar.classList.remove('sidebar-collapsed');
     sidebar.classList.remove('-translate-x-full');
+    if (main) main.style.marginLeft = window.innerWidth >= 768 ? '16rem' : '0';
     if (window.innerWidth < 768) {
       overlay.classList.remove('hidden');
     }
   } else {
     sidebar.classList.add('sidebar-collapsed');
+    if (main) main.style.marginLeft = '0';
     if (window.innerWidth < 768) {
       sidebar.classList.add('-translate-x-full');
       overlay.classList.add('hidden');
@@ -146,8 +140,6 @@ export function closeSidebar() {
   }
 }
 
-// Dashboard view navigation
-// Welcome dismisses on first meaningful navigation away from overview
 export function setDashboardView(view) {
   document.querySelectorAll('.dashboard-view').forEach(v => {
     v.classList.add('hidden');
@@ -162,10 +154,8 @@ export function setDashboardView(view) {
   const welcomeHeader = document.getElementById('welcome-header');
   if (welcomeHeader) {
     if (view === 'overview' && shouldShowWelcome()) {
-      // Back on overview and not yet dismissed — show it
       welcomeHeader.style.display = '';
     } else if (view !== 'overview') {
-      // User navigated to another section — dismiss welcome permanently
       if (!welcomeDismissed) {
         welcomeDismissed = true;
         markWelcomeSeen();
@@ -184,8 +174,6 @@ export function setDashboardView(view) {
   if (view === 'reminders') renderReminders();
 }
 
-// Modal functions
-// Opening a modal = first meaningful interaction — dismiss welcome
 export function openModal(type) {
   if (!welcomeDismissed) {
     closeWelcomePopup();
@@ -200,7 +188,6 @@ export function closeModal(type) {
   }
 }
 
-// Dismiss welcome — called by ✕ button or on first interaction
 export function closeWelcomePopup() {
   const welcomeHeader = document.getElementById('welcome-header');
   if (welcomeHeader) welcomeHeader.style.display = 'none';
@@ -208,7 +195,6 @@ export function closeWelcomePopup() {
   markWelcomeSeen();
 }
 
-// Toast notifications
 export function showToast(message, type = 'success') {
   const container = document.getElementById('toast-container');
   if (!container) return;
@@ -232,8 +218,6 @@ export function showToast(message, type = 'success') {
   }, 3000);
 }
 
-// --- Security Helper ---
-// Prevents XSS attacks by sanitizing user input before rendering HTML
 function escapeHTML(str) {
   if (!str) return '';
   return String(str)
@@ -244,7 +228,6 @@ function escapeHTML(str) {
     .replace(/'/g, '&#39;');
 }
 
-// Helper functions
 function getStatusBadge(status) {
   const configs = {
     not_started: { bg: 'bg-maroon-100', text: 'text-maroon-700', label: 'Not Started' },
@@ -262,7 +245,6 @@ function daysUntil(dateStr) {
   return Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
 }
 
-// Render applications
 function renderApplications() {
   const recentContainer = document.getElementById('recent-applications');
   const allContainer = document.getElementById('all-applications');
@@ -323,7 +305,6 @@ function renderApplications() {
   allContainer.innerHTML = sortedApps.map(renderCard).join('');
 }
 
-// Update statistics
 async function updateStats() {
   const stats = await getStats();
   if (!stats) return;
@@ -333,7 +314,6 @@ async function updateStats() {
   document.getElementById('stat-potential').textContent = `$${stats.potentialAwards.toLocaleString()}`;
 }
 
-// Render calendar view
 function renderCalendar() {
   const container = document.getElementById('calendar-deadlines');
   if (!container) return;
@@ -373,7 +353,6 @@ function renderCalendar() {
   }).join('');
 }
 
-// Render reminders
 function renderReminders() {
   const container = document.getElementById('reminders-list');
   if (!container) return;
@@ -415,7 +394,6 @@ function renderReminders() {
   }).join('');
 }
 
-// Add application
 export async function addApplication(e) {
   e.preventDefault();
 
@@ -436,7 +414,6 @@ export async function addApplication(e) {
   const { error } = await createApplication(appData);
 
   if (error) {
-    console.error('Add application error:', error);
     showToast(`Failed to add application: ${error.message}`, 'error');
   } else {
     showToast('Application added successfully!');
@@ -448,7 +425,6 @@ export async function addApplication(e) {
   btn.textContent = 'Add Application';
 }
 
-// Edit application
 export function editApplication(id) {
   const app = applications.find(a => a.id === id);
   if (!app) return;
@@ -464,7 +440,6 @@ export function editApplication(id) {
   openModal('edit-application');
 }
 
-// Save edited application
 export async function saveApplication(e) {
   e.preventDefault();
 
@@ -485,7 +460,6 @@ export async function saveApplication(e) {
   const { error } = await updateApplication(currentEditApp.id, updates);
 
   if (error) {
-    console.error('Save application error:', error);
     showToast(`Failed to update application: ${error.message}`, 'error');
   } else {
     showToast('Application updated successfully!');
@@ -500,7 +474,6 @@ export async function saveApplication(e) {
   btn.textContent = 'Save Changes';
 }
 
-// Confirm and delete
 export function confirmDelete(id) {
   const btn = document.querySelector(`[data-id="${id}"] .delete-btn`);
   if (!btn) return;
@@ -540,7 +513,6 @@ export async function clearReminder(id) {
   }
 }
 
-// Auth handlers
 export async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value;
@@ -551,28 +523,24 @@ export async function handleLogin(e) {
   } else {
     setWelcomeTrigger();
     showToast('Welcome back!');
-   window.location.href = 'dashboard.html';
+    window.location.href = 'dashboard.html';
   }
 }
 
-// Security: Frontend email validation bouncer
 export async function handleSignup(e) {
   e.preventDefault();
-  console.log("Signup clicked! Checking email format...");
   
   const firstName = document.getElementById('signup-first').value.trim();
   const lastName = document.getElementById('signup-last').value.trim();
   const email = document.getElementById('signup-email').value.trim().toLowerCase();
   const password = document.getElementById('signup-password').value;
   
-  // 1. Basic Regex: Ensure it actually looks like an email (something@something.something)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     showToast('Please enter a valid email format.', 'error');
     return;
   }
 
-  // 2. The Bouncer: Block obvious dummy and disposable domains
   const blockedDomains = [
     'email.com', 'test.com', 'example.com', 'mailinator.com', 
     'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'yopmail.com',
@@ -585,7 +553,6 @@ export async function handleSignup(e) {
     return;
   }
 
-  // Change button state so they know it's working
   const btn = e.target.querySelector('button[type="submit"]');
   const originalText = btn.textContent;
   btn.disabled = true;
@@ -602,7 +569,6 @@ export async function handleSignup(e) {
     setWelcomeTrigger();
     showToast('Account created! Check your email to confirm.');
     
-    // We don't await the email so the UI feels instant
     sendWelcomeEmail(email, fullName).catch(err => console.error("Welcome email failed", err));
     
     document.getElementById('signup-form').reset();
@@ -610,10 +576,51 @@ export async function handleSignup(e) {
   }
 }
 
-// --- Global window assignments ---
+export async function handleContactSubmit(e) {
+  e.preventDefault();
+  
+  const btn = document.getElementById('send-contact-btn');
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  const payload = {
+    name: document.getElementById('contact-name').value.trim(),
+    email: document.getElementById('contact-email').value.trim(),
+    message: document.getElementById('contact-message').value.trim()
+  };
+
+  try {
+    // Uses Vite's environment variable system. If not set, it defaults to a clean local path.
+    // In production, you would add VITE_API_URL=https://your-render-url.onrender.com to Vercel's env variables.
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    
+    const response = await fetch(`${apiUrl}/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showToast('Message sent! We will get back to you soon.', 'success');
+      document.getElementById('contact-form').reset();
+    } else {
+      showToast(data.message || 'Omo, something went wrong. Try again.', 'error');
+    }
+  } catch (err) {
+    showToast('Network error. Check your connection.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
 window.handleSignOut = signOutUser;
 window.handleLogin = handleLogin;
 window.handleSignup = handleSignup;
+window.handleContactSubmit = handleContactSubmit; 
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
@@ -644,7 +651,6 @@ window.closeMobileMenu = function () {
   if (overlay) overlay.classList.add('hidden');
 };
 
-// --- DOM wiring ---
 function wireDashboardActions() {
   document.querySelectorAll('[data-view]').forEach(el => {
     el.addEventListener('click', () => setDashboardView(el.dataset.view));
@@ -662,21 +668,14 @@ function wireDashboardActions() {
     });
   });
 
-  // Sidebar event listeners
   const hamburgerBtn = document.getElementById('hamburger-menu');
-  if (hamburgerBtn) {
-    hamburgerBtn.addEventListener('click', toggleSidebar);
-  }
+  if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleSidebar);
 
   const closeMobileBtn = document.getElementById('sidebar-close-mobile');
-  if (closeMobileBtn) {
-    closeMobileBtn.addEventListener('click', closeSidebar);
-  }
+  if (closeMobileBtn) closeMobileBtn.addEventListener('click', closeSidebar);
 
   const closeDesktopBtn = document.getElementById('sidebar-close-desktop');
-  if (closeDesktopBtn) {
-    closeDesktopBtn.addEventListener('click', toggleSidebar);
-  }
+  if (closeDesktopBtn) closeDesktopBtn.addEventListener('click', toggleSidebar);
 
   const sidebarNav = document.getElementById('sidebar-nav');
   if (sidebarNav) {
@@ -697,14 +696,12 @@ function handleFilterChange(e) {
 (async () => {
   wireDashboardActions();
 
-  // Catch the email verification redirect and show toast
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('verified') === 'true') {
     showToast('Email verified! You can now log in.', 'success');
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // Explicitly wire the auth forms to their functions
   const signupForm = document.getElementById('signup-form');
   if (signupForm) signupForm.addEventListener('submit', handleSignup);
 
@@ -716,6 +713,9 @@ function handleFilterChange(e) {
   
   const editForm = document.getElementById('edit-application-form');
   if (editForm) editForm.addEventListener('submit', saveApplication);
+
+  const contactForm = document.getElementById('contact-form');
+  if (contactForm) contactForm.addEventListener('submit', handleContactSubmit);
   
   const filter = document.getElementById('filter-status');
   if (filter) filter.addEventListener('change', handleFilterChange);
@@ -731,51 +731,31 @@ function handleFilterChange(e) {
 
   await initApp();
   
-  // Only set dashboard view if we are actually on the dashboard HTML page
+  const main = document.getElementById('main-content');
+  if (main && window.innerWidth >= 768) {
+    main.style.marginLeft = '16rem';
+    sidebarOpen = true;
+  }
+  
   if (document.getElementById('dashboard-overview')) {
     setDashboardView('overview');
   }
 })();
 
-// Email integration stubs
-export function connectGmail() {
-  showToast('Gmail integration coming soon!', 'info');
-}
-export function connectOutlook() {
-  showToast('Outlook integration coming soon!', 'info');
-}
-export function connectYahoo() {
-  showToast('Yahoo Mail integration coming soon!', 'info');
-}
-export function configureOtherEmail() {
-  showToast('IMAP/SMTP configuration coming soon!', 'info');
-}
+export function connectGmail() { showToast('Gmail integration coming soon!', 'info'); }
+export function connectOutlook() { showToast('Outlook integration coming soon!', 'info'); }
+export function connectYahoo() { showToast('Yahoo Mail integration coming soon!', 'info'); }
+export function configureOtherEmail() { showToast('IMAP/SMTP configuration coming soon!', 'info'); }
 
-// Welcome state helpers
-function shouldShowWelcome() {
-  return hasWelcomeTrigger() && !hasSeenWelcome();
-}
+function shouldShowWelcome() { return hasWelcomeTrigger() && !hasSeenWelcome(); }
 function setWelcomeTrigger() {
-  try {
-    sessionStorage.setItem(WELCOME_TRIGGER_KEY, 'true');
-    sessionStorage.removeItem(WELCOME_SEEN_KEY);
-  } catch (e) {}
+  try { sessionStorage.setItem(WELCOME_TRIGGER_KEY, 'true'); sessionStorage.removeItem(WELCOME_SEEN_KEY); } catch (e) {}
 }
-function hasWelcomeTrigger() {
-  try { return sessionStorage.getItem(WELCOME_TRIGGER_KEY) === 'true'; } catch (e) { return false; }
-}
-function hasSeenWelcome() {
-  try { return sessionStorage.getItem(WELCOME_SEEN_KEY) === 'true'; } catch (e) { return false; }
-}
+function hasWelcomeTrigger() { try { return sessionStorage.getItem(WELCOME_TRIGGER_KEY) === 'true'; } catch (e) { return false; } }
+function hasSeenWelcome() { try { return sessionStorage.getItem(WELCOME_SEEN_KEY) === 'true'; } catch (e) { return false; } }
 function markWelcomeSeen() {
-  try {
-    sessionStorage.setItem(WELCOME_SEEN_KEY, 'true');
-    sessionStorage.removeItem(WELCOME_TRIGGER_KEY);
-  } catch (e) {}
+  try { sessionStorage.setItem(WELCOME_SEEN_KEY, 'true'); sessionStorage.removeItem(WELCOME_TRIGGER_KEY); } catch (e) {}
 }
 function clearWelcomeState() {
-  try {
-    sessionStorage.removeItem(WELCOME_TRIGGER_KEY);
-    sessionStorage.removeItem(WELCOME_SEEN_KEY);
-  } catch (e) {}
+  try { sessionStorage.removeItem(WELCOME_TRIGGER_KEY); sessionStorage.removeItem(WELCOME_SEEN_KEY); } catch (e) {}
 }
