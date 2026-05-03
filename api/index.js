@@ -15,18 +15,17 @@ app.get('/ping', (req, res) => {
 });
 const PORT = process.env.PORT || 8000;
 
-// --- Middleware ---
+// Middleware
 app.use(express.json());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://scholaco.vercel.app',
-    'https://scholaco-five.vercel.app'
+    'https://scholaco-five.vercel.app',
+    'https://scholaco.tech'
   ],
   credentials: true,
 }));
 
-// --- Health check ---
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
@@ -64,7 +63,7 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-// --- Welcome email ---
+// Welcome email
 app.post('/emails/welcome', verifyToken, async (req, res) => {
   const { email, full_name } = req.body;
 
@@ -81,7 +80,7 @@ app.post('/emails/welcome', verifyToken, async (req, res) => {
   res.json({ message: 'Welcome email sent' });
 });
 
-// --- Application submitted email ---
+// Application submitted email
 app.post('/emails/application-submitted', verifyToken, async (req, res) => {
   const { app_name } = req.body;
   const userEmail = req.user.email;
@@ -103,7 +102,7 @@ app.post('/emails/application-submitted', verifyToken, async (req, res) => {
   res.json({ message: 'Confirmation email sent' });
 });
 
-// --- Boot ---
+// Boot
 startScheduler();
 
 app.listen(PORT, () => {
