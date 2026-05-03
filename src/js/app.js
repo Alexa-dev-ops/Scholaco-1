@@ -111,7 +111,7 @@ export function toggleSidebar() {
   if (sidebarOpen) {
     sidebar.classList.remove('sidebar-collapsed');
     sidebar.classList.remove('-translate-x-full');
-    if (main) main.style.marginLeft = window.innerWidth >= 768 ? '16rem' : '0';
+    if (main) main.style.marginLeft = window.innerWidth >= 768 ? '' : '0';
     if (window.innerWidth < 768) {
       overlay.classList.remove('hidden');
     }
@@ -733,7 +733,6 @@ function handleFilterChange(e) {
   
   const main = document.getElementById('main-content');
   if (main && window.innerWidth >= 768) {
-    main.style.marginLeft = '16rem';
     sidebarOpen = true;
   }
   
