@@ -36,8 +36,9 @@ export async function initApp() {
       await updateWelcomeMessage();
       await loadApplications();
     } else if (event === 'SIGNED_OUT') {
+      // Logic handled primarily by handleSignOut to ensure state clearance
       currentUser = null;
-      applications = []; // Clear local state on logout
+      applications = []; 
       clearWelcomeState();
       window.location.href = 'index.html';
     }
@@ -618,6 +619,7 @@ export async function handleContactSubmit(e) {
 
 /**
  * SIGN OUT FIX: Added robust sign-out handler to address stale sessions.
+ * This function clears the session locally regardless of the server-side response.
  */
 export async function handleSignOut() {
   try {
@@ -626,7 +628,7 @@ export async function handleSignOut() {
   } catch (err) {
     console.error("Sign-out error:", err);
   } finally {
-    // Always clear local state and force redirect even if server call fails
+    // ALWAYS clear state locally to stop the "refresh required" loop
     currentUser = null;
     applications = [];
     clearWelcomeState();
