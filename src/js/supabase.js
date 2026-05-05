@@ -45,23 +45,16 @@ export async function signUp(email, password, fullName) {
 }
 
 // The centralized, bulletproof sign-out function
-export async function signOutUser(event) {
-  if (event) event.preventDefault();
-
+export async function signOutUser() {
   try {
-    // 1. Tell Supabase to end the session
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.warn("Server warning during sign out:", error.message);
-    }
-  } catch (err) {
-    console.error("Unexpected error during sign out:", err);
+    // Attempt the server-side sign-out
+    await supabase.auth.signOut();
+  } catch (error) {
+    console.error('Sign out error:', error);
   } finally {
-    // 2. The Nuke: Clear all local data
+    // FORCE clear everything locally regardless of server response
     localStorage.clear();
     sessionStorage.clear();
-
-    // 3. Redirect to login
-    window.location.href = '/index.html'; // Or '/login.html' depending on your setup
+    window.location.href = 'index.html'; 
   }
 }
