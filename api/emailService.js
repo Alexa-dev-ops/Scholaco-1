@@ -1,82 +1,37 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 dotenv.config();
 
 // --- ENV VARS ---
-const APP_URL = process.env.APP_URL || 'https://scholaco.vercel.app';
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_PASS = process.env.GMAIL_APP_PASSWORD;
+const APP_URL = process.env.APP_URL || 'https://scholaco.tech';
+const SENDER_EMAIL = 'hello@scholaco.tech';
 
-// --- NODEMAILER SETUP (ACTIVE FOR BETA) ---
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
+// --- RESEND SETUP ---
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Base send function — everything goes through here
 async function send(toEmail, subject, html) {
   try {
-    const info = await transporter.sendMail({
-      from: `"Scholaco" <${GMAIL_USER}>`, 
+    const { data, error } = await resend.emails.send({
+      from: `Scholaco <${SENDER_EMAIL}>`,
       to: toEmail,
       subject: subject,
       html: html,
     });
 
-    console.log(`[Nodemailer] Email sent to ${toEmail} (Message ID: ${info.messageId})`);
-    return true;
-    
-  } catch (err) {
-    console.error('[Nodemailer Error]', err.message);
-    return false;
-  }
-}
-
-/* ============================================================================
-   BREVO SETUP (ON HOLD UNTIL ACCOUNT ACTIVATION)
-   To switch back to Brevo later, delete the Nodemailer setup above, 
-   uncomment this block, and restart the server.
-   ============================================================================
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
-const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
-
-const headers = {
-  'Accept': 'application/json',
-  'Content-Type': 'application/json',
-  'api-key': BREVO_API_KEY,
-};
-
-async function send(toEmail, subject, html) {
-  try {
-    const response = await fetch(BREVO_API_URL, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        sender: { email: BREVO_SENDER_EMAIL, name: 'Scholaco' },
-        to: [{ email: toEmail }],
-        subject,
-        htmlContent: html,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[Brevo Error]', error);
+    if (error) {
+      console.error('[Resend Error]', error);
       return false;
     }
+
+    console.log(`[Resend] Email sent to ${toEmail} (ID: ${data.id})`);
     return true;
+
   } catch (err) {
-    console.error('[Brevo Error]', err.message);
+    console.error('[Resend Error]', err.message);
     return false;
   }
 }
-============================================================================ */
 
 // --- Welcome email ---
 export async function sendWelcomeEmail(toEmail, fullName) {
