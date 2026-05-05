@@ -37,6 +37,7 @@ export async function initApp() {
       await loadApplications();
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
+      applications = []; // Clear local state on logout
       clearWelcomeState();
       window.location.href = 'index.html';
     }
@@ -591,8 +592,6 @@ export async function handleContactSubmit(e) {
   };
 
   try {
-    // Uses Vite's environment variable system. If not set, it defaults to a clean local path.
-    // In production, you would add VITE_API_URL=https://your-render-url.onrender.com to Vercel's env variables.
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     
     const response = await fetch(`${apiUrl}/api/contact`, {
@@ -617,7 +616,27 @@ export async function handleContactSubmit(e) {
   }
 }
 
-window.handleSignOut = signOutUser;
+/**
+ * SIGN OUT FIX: Added robust sign-out handler to address stale sessions.
+ */
+export async function handleSignOut() {
+  try {
+    // Attempt graceful server-side logout
+    await signOutUser();
+  } catch (err) {
+    console.error("Sign-out error:", err);
+  } finally {
+    // Always clear local state and force redirect even if server call fails
+    currentUser = null;
+    applications = [];
+    clearWelcomeState();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
+}
+
+window.handleSignOut = handleSignOut;
 window.handleLogin = handleLogin;
 window.handleSignup = handleSignup;
 window.handleContactSubmit = handleContactSubmit; 
@@ -638,6 +657,7 @@ window.connectGmail = connectGmail;
 window.connectOutlook = connectOutlook;
 window.connectYahoo = connectYahoo;
 window.configureOtherEmail = configureOtherEmail;
+
 window.toggleMobileMenu = function () {
   const sidebar = document.getElementById('app-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
@@ -724,10 +744,10 @@ function handleFilterChange(e) {
   if (addBtn) addBtn.addEventListener('click', () => openModal('add-application'));
 
   const signOutBtn = document.getElementById('signOutBtn');
-  if (signOutBtn) signOutBtn.addEventListener('click', signOutUser);
+  if (signOutBtn) signOutBtn.addEventListener('click', handleSignOut);
 
   const globalSignOutBtn = document.getElementById('globalSignOutBtn');
-  if (globalSignOutBtn) globalSignOutBtn.addEventListener('click', signOutUser);
+  if (globalSignOutBtn) globalSignOutBtn.addEventListener('click', handleSignOut);
 
   await initApp();
   
