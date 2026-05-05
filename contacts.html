@@ -32,6 +32,14 @@
       box-sizing: border-box;
     }
   </style>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" href="/icons/favicon.ico" />
+  <meta name="theme-color" content="#7B1C2E" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Scholaco" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
 </head>
 
 <body class="h-full font-body bg-white text-gray-800 overflow-auto flex flex-col">
@@ -124,6 +132,15 @@
     window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(() => console.log('[SW] Registered'))
+          .catch((err) => console.error('[SW] Error:', err));
+      });
+    }
+  </script>
 </body>
 
 </html>
