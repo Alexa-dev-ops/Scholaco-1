@@ -65,7 +65,7 @@
       overlay.classList.add('hidden');
     };
 
-    window.handleHamburger = function() {
+    window.handleHamburger = function () {
       if (window.innerWidth < 768) {
         window.toggleMobileMenu();
       } else {
@@ -73,7 +73,7 @@
       }
     };
 
-    window.toggleDesktopSidebar = function() {
+    window.toggleDesktopSidebar = function () {
       const sidebar = document.getElementById('app-sidebar');
       const isOpen = !sidebar.classList.contains('md:-translate-x-full');
       if (isOpen) {
@@ -85,7 +85,7 @@
       }
     };
 
-    window.closeDesktopSidebar = function() {
+    window.closeDesktopSidebar = function () {
       const sidebar = document.getElementById('app-sidebar');
       sidebar.classList.remove('md:translate-x-0');
       sidebar.classList.add('md:-translate-x-full');
@@ -116,12 +116,14 @@
             <div class="flex items-center gap-3">
               <img src="images/scholaco_logo_transparent.png" alt="Scholaco Logo" class="h-10 w-auto">
             </div>
-            <button id="sidebar-close-mobile" onclick="window.closeMobileMenu()" class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+            <button id="sidebar-close-mobile" onclick="window.closeMobileMenu()"
+              class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <button id="sidebar-close-desktop" onclick="window.closeDesktopSidebar()" class="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
+            <button id="sidebar-close-desktop" onclick="window.closeDesktopSidebar()"
+              class="hidden md:block p-2 hover:bg-gray-100 rounded-lg">
               <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -191,8 +193,7 @@
 
       <main id="main-content" class="dashboard-wrapper flex-1 min-w-0 p-4 sm:p-8 w-full h-screen overflow-y-auto">
 
-        <div
-          class="flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
+        <div class="flex items-center justify-between bg-white p-4 shadow-sm rounded-2xl mb-6 border border-gray-100">
           <div class="flex items-center gap-2">
             <img src="/images/scholaco_logo_transparent.png" alt="Scholaco Logo" class="h-8 w-auto">
           </div>
@@ -343,6 +344,7 @@
     </div>
   </div>
 
+  <!-- ADD APPLICATION MODAL -->
   <div id="modal-add-application" class="fixed inset-0 z-50 hidden">
     <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
@@ -355,24 +357,114 @@
         </div>
         <form id="add-application-form" class="space-y-5">
           <div><label for="app-name" class="block text-sm font-medium text-gray-700 mb-2">Scholarship Name *</label>
-            <input type="text" id="app-name" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all" placeholder="e.g., Gates Scholarship" required></div>
+            <input type="text" id="app-name"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
+              placeholder="e.g., Gates Scholarship" required>
+          </div>
           <div><label for="app-org" class="block text-sm font-medium text-gray-700 mb-2">Organization</label>
-            <input type="text" id="app-org" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all" placeholder="e.g., Bill &amp; Melinda Gates Foundation"></div>
-            <div class="grid grid-cols-2 gap-4"><div>
+            <input type="text" id="app-org"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
+              placeholder="e.g., Bill &amp; Melinda Gates Foundation">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
               <label for="app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
-              <input type="text" id="app-amount" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all" placeholder="e.g., $10,000"></div>
-              <div><label for="app-deadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
-                <input type="date" id="app-deadline" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"></div></div>
-                <div><label for="app-status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select id="app-status" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"> <option value="not_started">Not Started</option> <option value="in_progress">In Progress</option> <option value="awaiting">Completed / Awaiting Response</option> </select></div>
-                <div><label for="app-reminder" class="block text-sm font-medium text-gray-700 mb-2">Set Reminder</label>
-                  <input type="datetime-local" id="app-reminder" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"></div>
-                  <div><label for="app-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label> <textarea id="app-notes" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none" placeholder="Any additional notes..."></textarea>
-                <button type="button" data-modal-close="add-application"
+              <input type="text" id="app-amount"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
+                placeholder="e.g., $10,000">
+            </div>
+            <div><label for="app-deadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
+              <input type="date" id="app-deadline"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+            </div>
+          </div>
+          <div><label for="app-status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select id="app-status"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+              <option value="not_started">Not Started</option>
+              <option value="in_progress">In Progress</option>
+              <option value="awaiting">Completed / Awaiting Response</option>
+            </select>
+          </div>
+          <div><label for="app-reminder" class="block text-sm font-medium text-gray-700 mb-2">Set Reminder</label>
+            <input type="datetime-local" id="app-reminder"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+          </div>
+          <div><label for="app-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label> <textarea
+              id="app-notes" rows="3"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none"
+              placeholder="Any additional notes..."></textarea>
+            <button type="button" data-modal-close="add-application"
               class="w-full sm:flex-1 px-6 py-3 rounded-xl border border-gray-200 font-semibold">Cancel</button>
-              <button type="submit" id="add-app-btn"
+            <button type="submit" id="add-app-btn"
               class="w-full sm:flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Add
               Application</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT APPLICATION MODAL (MODIFIED SECTION) -->
+  <div id="modal-edit-application" class="fixed inset-0 z-50 hidden">
+    <div class="modal-backdrop absolute inset-0 bg-black/40"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+      <div
+        class="glass-card rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl pointer-events-auto animate-fade-in-up max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="font-display text-2xl font-bold">Edit Application</h2>
+          <button type="button" data-modal-close="edit-application"
+            class="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors flex-shrink-0">✕</button>
+        </div>
+        <form id="edit-application-form" class="space-y-5">
+          <input type="hidden" id="edit-app-id">
+          <div>
+            <label for="edit-app-name" class="block text-sm font-medium text-gray-700 mb-2">Scholarship Name *</label>
+            <input type="text" id="edit-app-name"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all"
+              required>
+          </div>
+          <div>
+            <label for="edit-app-org" class="block text-sm font-medium text-gray-700 mb-2">Organization</label>
+            <input type="text" id="edit-app-org"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="edit-app-amount" class="block text-sm font-medium text-gray-700 mb-2">Award Amount</label>
+              <input type="text" id="edit-app-amount"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+            </div>
+            <div>
+              <label for="edit-app-deadline" class="block text-sm font-medium text-gray-700 mb-2">Deadline</label>
+              <input type="date" id="edit-app-deadline"
+                class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+            </div>
+          </div>
+          <div>
+            <label for="edit-app-status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <select id="edit-app-status"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+              <option value="not_started">Not Started</option>
+              <option value="in_progress">In Progress</option>
+              <option value="awaiting">Completed / Awaiting Response</option>
+            </select>
+          </div>
+          <div>
+            <label for="edit-app-reminder" class="block text-sm font-medium text-gray-700 mb-2">Set Reminder</label>
+            <input type="datetime-local" id="edit-app-reminder"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all">
+          </div>
+          <div>
+            <label for="edit-app-notes" class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+            <textarea id="edit-app-notes" rows="3"
+              class="w-full px-4 py-3 rounded-xl border border-gray-200 input-focus outline-none transition-all resize-none"></textarea>
+          </div>
+          <div class="flex gap-4">
+            <button type="button" data-modal-close="edit-application"
+              class="flex-1 px-6 py-3 rounded-xl border border-gray-200 font-semibold">Cancel</button>
+            <button type="submit" id="edit-app-btn"
+              class="flex-1 btn-primary px-6 py-3 rounded-xl text-white font-semibold">Save Changes</button>
           </div>
         </form>
       </div>
