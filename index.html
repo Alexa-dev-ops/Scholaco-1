@@ -507,10 +507,10 @@
 <script>
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isStandalone = window.navigator.standalone;
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  
-  // Show banner only if iOS + not Safari + not already installed
-  if (isIOS && !isSafari && !isStandalone) {
+  const isChrome = /CriOS/i.test(navigator.userAgent); // CriOS = Chrome on iOS
+
+  // Show banner if iOS + Chrome + not already installed
+  if (isIOS && isChrome && !isStandalone) {
     document.getElementById('ios-install-banner').style.display = 'block';
   }
 </script>
